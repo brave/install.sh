@@ -324,6 +324,7 @@ main() {
 		CURL="curl -fsSL"
 	elif type wget >/dev/null; then
 		CURL="wget -q -O-"
+    # TODO: should we install curl, if neither curl, nor wget is missing?
 	fi
 	if [ -z "$CURL" ]; then
 		echo "The installer needs either curl or wget to download files."
@@ -505,11 +506,10 @@ main() {
 		;;
 		zypper)
 			set -x
-			$SUDO rpm --import "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/repo.gpg"
-			$SUDO zypper --non-interactive ar -g -r "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/tailscale.repo"
+			$SUDO rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+			$SUDO zypper --non-interactive ar -g -r https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
 			$SUDO zypper --non-interactive --gpg-auto-import-keys refresh
-			$SUDO zypper --non-interactive install tailscale
-			$SUDO systemctl enable --now tailscaled
+			$SUDO zypper --non-interactive install brave-browser
 			set +x
 			;;
 		pacman)
