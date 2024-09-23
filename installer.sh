@@ -488,10 +488,12 @@ main() {
 		;;
 		dnf)
 			set -x
+			# TODO: support other channels
 			$SUDO dnf install -y 'dnf-command(config-manager)'
-			$SUDO dnf config-manager --add-repo "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/tailscale.repo"
-			$SUDO dnf install -y tailscale
-			$SUDO systemctl enable --now tailscaled
+			$SUDO dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+			# TODO: https://pkgs.tailscale.com/stable/fedora/tailscale.repo covers the pgp key - should we?
+			$SUDO rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+			$SUDO dnf install -y brave-browser
 			set +x
 		;;
 		tdnf)
