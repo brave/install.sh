@@ -27,7 +27,7 @@ main() {
 	TRACK="${TRACK:-stable}"
 
 	case "$TRACK" in
-		stable|unstable)
+		stable|unstable) # TODO: beta, nightly
 			;;
 		*)
 			echo "unsupported track $TRACK"
@@ -41,7 +41,7 @@ main() {
 		#  - VERSION_ID: the numeric release version for the OS, if any (e.g. "18.04")
 		#  - VERSION_CODENAME: the codename of the OS release, if any (e.g. "buster")
 		#  - UBUNTU_CODENAME: if it exists, use instead of VERSION_CODENAME
-		. /etc/os-release
+		. /etc/os-release # TODO: grep for the needed variables instead
 		case "$ID" in
 			ubuntu|pop|neon|zorin|tuxedo)
 				OS="ubuntu"
@@ -56,7 +56,7 @@ main() {
 				if expr "$VERSION_ID" : "2.*" >/dev/null; then
 					APT_KEY_TYPE="keyring"
 				else
-					APT_KEY_TYPE="legacy"
+					APT_KEY_TYPE="legacy" # TODO: is this still needed?
 				fi
 				;;
 			debian)
@@ -280,6 +280,8 @@ main() {
 			# TODO: wsl?
 			# TODO: synology? qnap?
 		esac
+
+                # TODO: Flatpak?
 	fi
 
 	# If we failed to detect something through os-release, consult
@@ -317,6 +319,7 @@ main() {
 	# Ideally we want to use curl, but on some installs we
 	# only have wget. Detect and use what's available.
 	CURL=
+        # TODO: disable following redirects?
 	if type curl >/dev/null; then
 		CURL="curl -fsSL"
 	elif type wget >/dev/null; then
@@ -328,7 +331,7 @@ main() {
 		exit 1
 	fi
 
-	TEST_URL="https://pkgs.tailscale.com/"
+	TEST_URL="https://pkgs.tailscale.com/" # TODO: Brave-hosted
 	RC=0
 	TEST_OUT=$($CURL "$TEST_URL" 2>&1) || RC=$?
 	if [ $RC != 0 ]; then
@@ -345,8 +348,8 @@ main() {
 	case "$OS" in
 		ubuntu|debian|raspbian|centos|oracle|rhel|amazon-linux|opensuse|photon)
 			# Check with the package server whether a given version is supported.
-			URL="https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/installer-supported"
-			$CURL "$URL" 2> /dev/null | grep -q OK || OS_UNSUPPORTED=1
+			URL="https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/installer-supported" # TODO: use a Brave endpoint
+			$CURL "$URL" 2> /dev/null | grep -q OK || OS_UNSUPPORTED=1 # TODO: check for status codes and error with different message if server is down
 			;;
 		fedora)
 			# All versions supported, no version checking required.
@@ -450,7 +453,7 @@ main() {
 	# Step 4: run the installation.
 	OSVERSION="$OS"
 	[ "$VERSION" != "" ] && OSVERSION="$OSVERSION $VERSION"
-	echo "Installing Tailscale for $OSVERSION, using method $PACKAGETYPE"
+	echo "Installing Brave for $OSVERSION, using method $PACKAGETYPE"
 	case "$PACKAGETYPE" in
 		apt)
 			export DEBIAN_FRONTEND=noninteractive
@@ -462,21 +465,17 @@ main() {
 			set -x
 			$SUDO mkdir -p --mode=0755 /usr/share/keyrings
 			case "$APT_KEY_TYPE" in
-				legacy)
+				legacy) # TODO: remove?
 					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.asc" | $SUDO apt-key add -
 					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.list" | $SUDO tee /etc/apt/sources.list.d/tailscale.list
 				;;
 				keyring)
-					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.noarmor.gpg" | $SUDO tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
-					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.tailscale-keyring.list" | $SUDO tee /etc/apt/sources.list.d/tailscale.list
-				;;
+                                        $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null # TODO: handle other channels/tracks
+                                        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"| $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list # TODO: support other channels
+									;;
 			esac
 			$SUDO apt-get update
-			$SUDO apt-get install -y tailscale tailscale-archive-keyring
-			if [ "$APT_SYSTEMCTL_START" = "true" ]; then
-				$SUDO systemctl enable --now tailscaled
-				$SUDO systemctl start tailscaled
-			fi
+			$SUDO apt-get install -y brave-browser
 			set +x
 		;;
 		yum)
@@ -560,13 +559,8 @@ main() {
 			;;
 	esac
 
-	echo "Installation complete! Log in to start using Tailscale by running:"
+	echo "Installation complete! Start Brave by typing brave-browser." # TODO: support other distros than just Debian
 	echo
-	if [ -z "$SUDO" ]; then
-		echo "tailscale up"
-	else
-		echo "$SUDO tailscale up"
-	fi
 }
 
 main
