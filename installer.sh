@@ -11,6 +11,8 @@ set -eu
 # bottom of the file, so that a truncated partial download doesn't end
 # up executing half a script.
 main() {
+	# TODO: should we replace all tabs with spaces?
+
 	# Step 1: detect the current linux distro, version, and packaging system.
 	#
 	# We rely on a combination of 'uname' and /etc/os-release to find
@@ -339,7 +341,7 @@ main() {
 		echo "The installer cannot reach $TEST_URL"
 		echo "Please make sure that your machine has internet access."
 		echo "Test output:"
-		echo $TEST_OUT
+		echo "$TEST_OUT"
 		exit 1
 	fi
 
@@ -513,10 +515,22 @@ main() {
 			set +x
 			;;
 		pacman)
-			set -x
-			$SUDO pacman -S tailscale --noconfirm
-			$SUDO systemctl enable --now tailscaled
-			set +x
+			# TODO: support beta and nightly
+			# TODO: support more aur helpers
+            # TODO: aur helpers will ask interactive questions - not sure if we consider that a problem
+			if command -v paru >/dev/null; then
+				set -x
+				paru -S brave-bin
+				set +x
+			elif command -v yay >/dev/null; then
+				set -x
+				yay -S brave-bin
+				set +x
+			else
+				# TODO: should we prefix error messages with something like "Error: "? and also print them to stderr?
+                echo "Could not find an AUR helper to install Brave (see: https://wiki.archlinux.org/title/AUR_helpers)"
+				exit 1
+			fi
 			;;
 		pkg)
 			set -x
