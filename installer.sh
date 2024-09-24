@@ -27,13 +27,13 @@ main() {
 	PACKAGETYPE=""
 	APT_KEY_TYPE="" # Only for apt-based distros
 	APT_SYSTEMCTL_START=false # Only needs to be true for Kali
-	TRACK="${TRACK:-stable}"
+	CHANNEL="${CHANNEL:-release}"
 
-	case "$TRACK" in
-		stable|unstable) # TODO: beta, nightly
+	case "$CHANNEL" in
+		release|beta|nightly) # TODO: beta, nightly
 			;;
 		*)
-			echo "unsupported channel $TRACK"
+			echo "unsupported channel $CHANNEL"
 			exit 1
 			;;
 	esac
@@ -343,7 +343,7 @@ main() {
 	case "$OS" in
 		ubuntu|debian|raspbian|centos|oracle|rhel|amazon-linux|opensuse|photon)
 			# Check with the package server whether a given version is supported.
-			URL="https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/installer-supported" # TODO: use a Brave endpoint
+			URL="https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION/installer-supported" # TODO: use a Brave endpoint
 			$CURL "$URL" 2> /dev/null | grep -q OK || OS_UNSUPPORTED=1 # TODO: check for status codes and error with different message if server is down
 			;;
 		fedora)
@@ -387,7 +387,7 @@ main() {
 			other-linux)
 				echo "Couldn't determine what kind of Linux is running."
 				echo "You could try the static binaries at:"
-				echo "https://pkgs.tailscale.com/$TRACK/#static"
+				echo "https://pkgs.tailscale.com/$CHANNEL/#static"
 				;;
 			"")
 				echo "Couldn't determine what operating system you're running."
@@ -457,8 +457,8 @@ main() {
 			$SUDO mkdir -p --mode=0755 /usr/share/keyrings
 			case "$APT_KEY_TYPE" in
 				legacy) # TODO: remove?
-					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.asc" | $SUDO apt-key add -
-					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.list" | $SUDO tee /etc/apt/sources.list.d/tailscale.list
+					$CURL "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION.asc" | $SUDO apt-key add -
+					$CURL "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION.list" | $SUDO tee /etc/apt/sources.list.d/tailscale.list
 				;;
 				keyring)
                                         $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null # TODO: handle other channels
@@ -472,7 +472,7 @@ main() {
 		yum)
 			set -x
 			$SUDO yum install yum-utils -y
-			$SUDO yum-config-manager -y --add-repo "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/tailscale.repo"
+			$SUDO yum-config-manager -y --add-repo "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION/tailscale.repo"
 			$SUDO yum install tailscale -y
 			$SUDO systemctl enable --now tailscaled
 			set +x
@@ -489,7 +489,7 @@ main() {
 		;;
 		tdnf)
 			set -x
-			curl -fsSL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION/tailscale.repo" > /etc/yum.repos.d/tailscale.repo
+			curl -fsSL "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION/tailscale.repo" > /etc/yum.repos.d/tailscale.repo
 			$SUDO tdnf install -y tailscale
 			$SUDO systemctl enable --now tailscaled
 			set +x
