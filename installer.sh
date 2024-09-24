@@ -1,5 +1,6 @@
 #!/bin/sh
-# Copyright (c) Tailscale Inc & AUTHORS
+# Copyright (c) Tailscale Inc
+# Copyright (c) 2024 The Brave Authors
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script detects the current operating system, and installs
