@@ -30,7 +30,7 @@ main() {
 	CHANNEL="${CHANNEL:-release}"
 
 	case "$CHANNEL" in
-		release|beta|nightly) # TODO: beta, nightly
+		release|beta|nightly)
 			;;
 		*)
 			echo "unsupported channel $CHANNEL"
