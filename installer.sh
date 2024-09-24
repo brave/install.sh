@@ -263,11 +263,6 @@ main() {
 				VERSION="" # rolling release
 				PACKAGETYPE="emerge"
 				;;
-			freebsd)
-				OS="$ID"
-				VERSION="$(echo "$VERSION_ID" | cut -f1 -d.)"
-				PACKAGETYPE="pkg"
-				;;
 			osmc)
 				OS="debian"
 				PACKAGETYPE="apt"
@@ -295,7 +290,7 @@ main() {
 					# the os-release probing above.
 					OS="freebsd"
 					VERSION="$(freebsd-version | cut -f1 -d.)"
-					PACKAGETYPE="pkg"
+					PACKAGETYPE=""
 					;;
 				OpenBSD)
 					OS="openbsd"
@@ -371,11 +366,7 @@ main() {
 			# Rolling release, no version checking needed.
 			;;
 		freebsd)
-			if [ "$VERSION" != "12" ] && \
-			   [ "$VERSION" != "13" ]
-			then
-				OS_UNSUPPORTED=1
-			fi
+			OS_UNSUPPORTED=1
 			;;
 		openbsd)
 			OS_UNSUPPORTED=1
@@ -528,13 +519,6 @@ main() {
                 echo "Could not find an AUR helper to install Brave (see: https://wiki.archlinux.org/title/AUR_helpers)"
 				exit 1
 			fi
-			;;
-		pkg)
-			set -x
-			$SUDO pkg install tailscale
-			$SUDO service tailscaled enable
-			$SUDO service tailscaled start
-			set +x
 			;;
 		apk)
 			set -x
