@@ -284,11 +284,6 @@ main() {
 	if [ -z "$OS" ]; then
 		if type uname >/dev/null 2>&1; then
 			case "$(uname)" in
-				OpenBSD)
-					OS="openbsd"
-					VERSION="$(uname -r)"
-					PACKAGETYPE=""
-					;;
 				Darwin)
 					OS="macos"
 					VERSION="$(sw_vers -productVersion | cut -f1-2 -d.)"
@@ -356,9 +351,6 @@ main() {
 			;;
 		gentoo)
 			# Rolling release, no version checking needed.
-			;;
-		openbsd)
-			OS_UNSUPPORTED=1
 			;;
 		macos)
 			# We delegate macOS installation to the app store, it will
