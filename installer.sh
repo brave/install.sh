@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script detects the current operating system, and installs
-# Tailscale according to that OS's conventions.
+# Brave according to that OS's conventions.
 
 set -eu
 
