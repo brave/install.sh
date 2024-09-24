@@ -33,7 +33,7 @@ main() {
 		stable|unstable) # TODO: beta, nightly
 			;;
 		*)
-			echo "unsupported track $TRACK"
+			echo "unsupported channel $TRACK"
 			exit 1
 			;;
 	esac
@@ -44,7 +44,7 @@ main() {
 		#  - VERSION_ID: the numeric release version for the OS, if any (e.g. "18.04")
 		#  - VERSION_CODENAME: the codename of the OS release, if any (e.g. "buster")
 		#  - UBUNTU_CODENAME: if it exists, use instead of VERSION_CODENAME
-		. /etc/os-release # TODO: grep for the needed variables instead
+		. /etc/os-release # TODO: grep for the needed variables instead?
 		case "$ID" in
 			ubuntu|pop|neon|zorin|tuxedo)
 				OS="ubuntu"
@@ -279,9 +279,6 @@ main() {
 				VERSION="$(echo "$VERSION_ID" | cut -f1 -d.)"
 				PACKAGETYPE="tdnf"
 				;;
-
-			# TODO: wsl?
-			# TODO: synology? qnap?
 		esac
 
                 # TODO: Flatpak?
@@ -327,7 +324,6 @@ main() {
 		CURL="curl -fsSL"
 	elif type wget >/dev/null; then
 		CURL="wget -q -O-"
-    # TODO: should we install curl, if neither curl, nor wget is missing?
 	fi
 	if [ -z "$CURL" ]; then
 		echo "The installer needs either curl or wget to download files."
@@ -474,7 +470,7 @@ main() {
 					$CURL "https://pkgs.tailscale.com/$TRACK/$OS/$VERSION.list" | $SUDO tee /etc/apt/sources.list.d/tailscale.list
 				;;
 				keyring)
-                                        $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null # TODO: handle other channels/tracks
+                                        $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null # TODO: handle other channels
                                         echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"| $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list # TODO: support other channels
 									;;
 			esac
