@@ -40,7 +40,7 @@ main() {
 
 	if [ -f /etc/os-release ]; then
 		# /etc/os-release populates a number of shell variables. We care about the following:
-		#  - ID: the short name of the OS (e.g. "debian", "freebsd")
+		#  - ID: the short name of the OS (e.g. "debian")
 		#  - VERSION_ID: the numeric release version for the OS, if any (e.g. "18.04")
 		#  - VERSION_CODENAME: the codename of the OS release, if any (e.g. "buster")
 		#  - UBUNTU_CODENAME: if it exists, use instead of VERSION_CODENAME
@@ -284,14 +284,6 @@ main() {
 	if [ -z "$OS" ]; then
 		if type uname >/dev/null 2>&1; then
 			case "$(uname)" in
-				FreeBSD)
-					# FreeBSD before 12.2 doesn't have
-					# /etc/os-release, so we wouldn't have found it in
-					# the os-release probing above.
-					OS="freebsd"
-					VERSION="$(freebsd-version | cut -f1 -d.)"
-					PACKAGETYPE=""
-					;;
 				OpenBSD)
 					OS="openbsd"
 					VERSION="$(uname -r)"
@@ -364,9 +356,6 @@ main() {
 			;;
 		gentoo)
 			# Rolling release, no version checking needed.
-			;;
-		freebsd)
-			OS_UNSUPPORTED=1
 			;;
 		openbsd)
 			OS_UNSUPPORTED=1
