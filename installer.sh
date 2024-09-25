@@ -388,7 +388,8 @@ main() {
 			;;
 		appstore)
 			set -x
-			open "https://apps.apple.com/us/app/tailscale/id1475387142"
+			echo "Download Brave from https://brave.com/download/"
+                        exit 0
 			set +x
 			;;
 		*)
