@@ -184,11 +184,6 @@ main() {
 				VERSION="" # rolling release
 				PACKAGETYPE="pacman"
 				;;
-			void)
-				OS="$ID"
-				VERSION="" # rolling release
-				PACKAGETYPE="xbps"
-				;;
 			gentoo)
 				OS="$ID"
 				VERSION="" # rolling release
@@ -264,9 +259,6 @@ main() {
 			# Rolling release, no version checking needed.
 			;;
 		manjaro)
-			# Rolling release, no version checking needed.
-			;;
-		void)
 			# Rolling release, no version checking needed.
 			;;
 		gentoo)
@@ -401,11 +393,6 @@ main() {
 				echo "Could not find an AUR helper to install Brave (see: https://wiki.archlinux.org/title/AUR_helpers)"
 				exit 1
 			fi
-			;;
-		xbps)
-			set -x
-			$SUDO xbps-install tailscale -y
-			set +x
 			;;
 		emerge)
 			set -x
