@@ -25,8 +25,6 @@ main() {
 	OS=""
 	VERSION=""
 	PACKAGETYPE=""
-	APT_KEY_TYPE="" # Only for apt-based distros
-	APT_SYSTEMCTL_START=false # Only needs to be true for Kali
 	CHANNEL="${CHANNEL:-release}"
 
 	case "$CHANNEL" in
@@ -54,28 +52,11 @@ main() {
 				    VERSION="$VERSION_CODENAME"
 				fi
 				PACKAGETYPE="apt"
-				# Third-party keyrings became the preferred method of
-				# installation in Ubuntu 20.04.
-				if expr "$VERSION_ID" : "2.*" >/dev/null; then
-					APT_KEY_TYPE="keyring"
-				else
-					APT_KEY_TYPE="legacy" # TODO: is this still needed?
-				fi
 				;;
 			debian)
 				OS="$ID"
 				VERSION="$VERSION_CODENAME"
 				PACKAGETYPE="apt"
-				# Third-party keyrings became the preferred method of
-				# installation in Debian 11 (Bullseye).
-				if [ -z "${VERSION_ID:-}" ]; then
-					# rolling release. If you haven't kept current, that's on you.
-					APT_KEY_TYPE="keyring"
-				elif [ "$VERSION_ID" -lt 11 ]; then
-					APT_KEY_TYPE="legacy"
-				else
-					APT_KEY_TYPE="keyring"
-				fi
 				;;
 			linuxmint)
 				if [ "${UBUNTU_CODENAME:-}" != "" ]; then
@@ -89,82 +70,48 @@ main() {
 				    VERSION="$VERSION_CODENAME"
 				fi
 				PACKAGETYPE="apt"
-				if [ "$VERSION_ID" -lt 5 ]; then
-					APT_KEY_TYPE="legacy"
-				else
-					APT_KEY_TYPE="keyring"
-				fi
 				;;
 			elementary)
 				OS="ubuntu"
 				VERSION="$UBUNTU_CODENAME"
 				PACKAGETYPE="apt"
-				if [ "$VERSION_ID" -lt 6 ]; then
-					APT_KEY_TYPE="legacy"
-				else
-					APT_KEY_TYPE="keyring"
-				fi
 				;;
 			parrot|mendel)
 				OS="debian"
 				PACKAGETYPE="apt"
-				if [ "$VERSION_ID" -lt 5 ]; then
-					VERSION="buster"
-					APT_KEY_TYPE="legacy"
-				else
-					VERSION="bullseye"
-					APT_KEY_TYPE="keyring"
-				fi
 				;;
 			galliumos)
 				OS="ubuntu"
 				PACKAGETYPE="apt"
 				VERSION="bionic"
-				APT_KEY_TYPE="legacy"
 				;;
 			pureos|kaisen)
 				OS="debian"
 				PACKAGETYPE="apt"
 				VERSION="bullseye"
-				APT_KEY_TYPE="keyring"
 				;;
 			raspbian)
 				OS="$ID"
 				VERSION="$VERSION_CODENAME"
 				PACKAGETYPE="apt"
-				# Third-party keyrings became the preferred method of
-				# installation in Raspbian 11 (Bullseye).
-				if [ "$VERSION_ID" -lt 11 ]; then
-					APT_KEY_TYPE="legacy"
-				else
-					APT_KEY_TYPE="keyring"
-				fi
 				;;
 			kali)
 				OS="debian"
 				PACKAGETYPE="apt"
 				YEAR="$(echo "$VERSION_ID" | cut -f1 -d.)"
-				APT_SYSTEMCTL_START=true
-				# Third-party keyrings became the preferred method of
-				# installation in Debian 11 (Bullseye), which Kali switched
-				# to in roughly 2021.x releases
 				if [ "$YEAR" -lt 2021 ]; then
 					# Kali VERSION_ID is "kali-rolling", which isn't distinguishing
 					VERSION="buster"
-					APT_KEY_TYPE="legacy"
 				else
 					VERSION="bullseye"
-					APT_KEY_TYPE="keyring"
 				fi
 				;;
 			Deepin)  # https://github.com/tailscale/tailscale/issues/7862
 				OS="debian"
 				PACKAGETYPE="apt"
 				if [ "$VERSION_ID" -lt 20 ]; then
-					APT_KEY_TYPE="legacy"
 					VERSION="buster"
 				else
-					APT_KEY_TYPE="keyring"
 					VERSION="bullseye"
 				fi
 				;;
@@ -261,7 +208,6 @@ main() {
 				OS="debian"
 				PACKAGETYPE="apt"
 				VERSION="bullseye"
-				APT_KEY_TYPE="keyring"
 				;;
 			photon)
 				OS="photon"
@@ -424,23 +370,12 @@ main() {
 	case "$PACKAGETYPE" in
 		apt)
 			export DEBIAN_FRONTEND=noninteractive
-			if [ "$APT_KEY_TYPE" = "legacy" ] && ! type gpg >/dev/null; then
-				$SUDO apt-get update
-				$SUDO apt-get install -y gnupg
-			fi
 
 			set -x
 			$SUDO mkdir -p --mode=0755 /usr/share/keyrings
-			case "$APT_KEY_TYPE" in
-				legacy) # TODO: remove?
-					$CURL "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION.asc" | $SUDO apt-key add -
-					$CURL "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION.list" | $SUDO tee /etc/apt/sources.list.d/tailscale.list
-				;;
-				keyring)
-                                        $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null # TODO: handle other channels
-                                        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"| $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list # TODO: support other channels
-									;;
-			esac
+			$CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null # TODO: handle other channels
+			echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"| $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list # TODO: support other channels
+
 			$SUDO apt-get update
 			$SUDO apt-get install -y brave-browser
 			set +x
