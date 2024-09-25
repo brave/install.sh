@@ -104,7 +104,7 @@ main() {
 					VERSION="bullseye"
 				fi
 				;;
-			Deepin)  # https://github.com/tailscale/tailscale/issues/7862
+			Deepin)
 				OS="debian"
 				PACKAGETYPE="apt"
 				if [ "$VERSION_ID" -lt 20 ]; then
@@ -383,10 +383,8 @@ main() {
 			fi
 			;;
 		appstore)
-			set -x
 			echo "Download Brave from https://brave.com/download/"
-                        exit 0
-			set +x
+			exit 0
 			;;
 		*)
 			echo "unexpected: unknown package type $PACKAGETYPE"
