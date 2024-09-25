@@ -184,11 +184,6 @@ main() {
 				VERSION="" # rolling release
 				PACKAGETYPE="pacman"
 				;;
-			gentoo)
-				OS="$ID"
-				VERSION="" # rolling release
-				PACKAGETYPE="emerge"
-				;;
 			osmc)
 				OS="debian"
 				PACKAGETYPE="apt"
@@ -259,9 +254,6 @@ main() {
 			# Rolling release, no version checking needed.
 			;;
 		manjaro)
-			# Rolling release, no version checking needed.
-			;;
-		gentoo)
 			# Rolling release, no version checking needed.
 			;;
 		macos)
@@ -393,11 +385,6 @@ main() {
 				echo "Could not find an AUR helper to install Brave (see: https://wiki.archlinux.org/title/AUR_helpers)"
 				exit 1
 			fi
-			;;
-		emerge)
-			set -x
-			$SUDO emerge --ask=n net-vpn/tailscale
-			set +x
 			;;
 		appstore)
 			set -x
