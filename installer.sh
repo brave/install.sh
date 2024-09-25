@@ -271,8 +271,6 @@ main() {
 		case "$OS" in
 			other-linux)
 				echo "Couldn't determine what kind of Linux is running."
-				echo "You could try the static binaries at:"
-				echo "https://pkgs.tailscale.com/$CHANNEL/#static"
 				;;
 			"")
 				echo "Couldn't determine what operating system you're running."
@@ -282,8 +280,8 @@ main() {
 				;;
 		esac
 		echo
-		echo "If you'd like us to support your system better, please email support@tailscale.com"
-		echo "and tell us what OS you're running."
+		echo "If you'd like us to support your system better, please file an issue at "
+		echo "https://github.com/brave/brave-browser/issues and tell us what OS you're running."
 		echo
 		echo "Please include the following information we gathered from your system:"
 		echo
