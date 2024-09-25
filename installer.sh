@@ -184,16 +184,6 @@ main() {
 				VERSION="" # rolling release
 				PACKAGETYPE="pacman"
 				;;
-			alpine)
-				OS="$ID"
-				VERSION="$VERSION_ID"
-				PACKAGETYPE="apk"
-				;;
-			postmarketos)
-				OS="alpine"
-				VERSION="$VERSION_ID"
-				PACKAGETYPE="apk"
-				;;
 			void)
 				OS="$ID"
 				VERSION="" # rolling release
@@ -209,14 +199,7 @@ main() {
 				PACKAGETYPE="apt"
 				VERSION="bullseye"
 				;;
-			photon)
-				OS="photon"
-				VERSION="$(echo "$VERSION_ID" | cut -f1 -d.)"
-				PACKAGETYPE="tdnf"
-				;;
 		esac
-
-                # TODO: Flatpak?
 	fi
 
 	# If we failed to detect something through os-release, consult
@@ -282,10 +265,6 @@ main() {
 			;;
 		manjaro)
 			# Rolling release, no version checking needed.
-			;;
-		alpine)
-			# All versions supported, no version checking needed.
-			# TODO: is that true? When was tailscale packaged?
 			;;
 		void)
 			# Rolling release, no version checking needed.
@@ -398,13 +377,6 @@ main() {
 			$SUDO dnf install -y brave-browser
 			set +x
 		;;
-		tdnf)
-			set -x
-			curl -fsSL "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION/tailscale.repo" > /etc/yum.repos.d/tailscale.repo
-			$SUDO tdnf install -y tailscale
-			$SUDO systemctl enable --now tailscaled
-			set +x
-		;;
 		zypper)
 			set -x
 			$SUDO rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
@@ -416,7 +388,6 @@ main() {
 		pacman)
 			# TODO: support beta and nightly
 			# TODO: support more aur helpers
-            # TODO: aur helpers will ask interactive questions - not sure if we consider that a problem
 			if command -v paru >/dev/null; then
 				set -x
 				paru -S brave-bin
@@ -427,24 +398,9 @@ main() {
 				set +x
 			else
 				# TODO: should we prefix error messages with something like "Error: "? and also print them to stderr?
-                echo "Could not find an AUR helper to install Brave (see: https://wiki.archlinux.org/title/AUR_helpers)"
+				echo "Could not find an AUR helper to install Brave (see: https://wiki.archlinux.org/title/AUR_helpers)"
 				exit 1
 			fi
-			;;
-		apk)
-			set -x
-			if ! grep -Eq '^http.*/community$' /etc/apk/repositories; then
-				if type setup-apkrepos >/dev/null; then
-					$SUDO setup-apkrepos -c -1
-				else
-					echo "installing tailscale requires the community repo to be enabled in /etc/apk/repositories"
-					exit 1
-				fi
-			fi
-			$SUDO apk add tailscale
-			$SUDO rc-update add tailscale
-			$SUDO rc-service tailscale start
-			set +x
 			;;
 		xbps)
 			set -x
