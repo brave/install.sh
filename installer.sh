@@ -247,12 +247,6 @@ main() {
 				VERSION="$VERSION_ID"
 				PACKAGETYPE="apk"
 				;;
-			nixos)
-				echo "Please add Tailscale to your NixOS configuration directly:"
-				echo
-				echo "services.tailscale.enable = true;"
-				exit 1
-				;;
 			void)
 				OS="$ID"
 				VERSION="" # rolling release
