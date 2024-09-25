@@ -12,8 +12,6 @@ set -eu
 # bottom of the file, so that a truncated partial download doesn't end
 # up executing half a script.
 main() {
-	# TODO: should we replace all tabs with spaces?
-
 	# Step 1: detect the current linux distro, version, and packaging system.
 	#
 	# We rely on a combination of 'uname' and /etc/os-release to find
@@ -221,6 +219,7 @@ main() {
 		CURL="wget -q -O-"
 	fi
 	if [ -z "$CURL" ]; then
+		# TODO: install curl instead of erroring out
 		echo "The installer needs either curl or wget to download files."
 		echo "Please install either curl or wget to proceed."
 		exit 1
