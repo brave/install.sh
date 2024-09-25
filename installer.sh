@@ -219,7 +219,6 @@ main() {
 		CURL="wget -q -O-"
 	fi
 	if [ -z "$CURL" ]; then
-		# TODO: install curl instead of erroring out
 		echo "The installer needs either curl or wget to download files."
 		echo "Please install either curl or wget to proceed."
 		exit 1
