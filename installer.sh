@@ -243,7 +243,6 @@ main() {
 		ubuntu|debian|raspbian|centos|oracle|rhel|amazon-linux|opensuse|photon)
 			# Check with the package server whether a given version is supported.
 			URL="https://pkgs.tailscale.com/stable/$OS/$VERSION/installer-supported" # TODO: use a Brave endpoint
-                        echo $URL
 			$CURL "$URL" 2> /dev/null | grep -q OK || OS_UNSUPPORTED=1 # TODO: check for status codes and error with different message if server is down
 			;;
 		fedora)
