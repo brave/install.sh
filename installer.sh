@@ -366,10 +366,13 @@ main() {
 			;;
 		pacman)
 			# TODO: support beta and nightly
-			# TODO: support more aur helpers
 			if command -v paru >/dev/null; then
 				set -x
 				paru -S brave-bin
+				set +x
+			elif command -v pikaur >/dev/null; then
+				set -x
+				pikaur -S brave-bin
 				set +x
 			elif command -v yay >/dev/null; then
 				set -x
