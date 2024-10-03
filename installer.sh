@@ -24,6 +24,16 @@ main() {
 	VERSION=""
 	PACKAGETYPE=""
 	CHANNEL="${CHANNEL:-release}"
+	ARCH="$(uname -m)"
+
+	case "$ARCH" in
+		aarch64|arm64|x86_64)
+			;;
+		*)
+			echo "unsupported architecture $ARCH"
+			exit 1
+			;;
+	esac
 
 	case "$CHANNEL" in
 		release|beta|nightly)
