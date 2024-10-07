@@ -24,12 +24,22 @@ main() {
 	VERSION=""
 	PACKAGETYPE=""
 	CHANNEL="${CHANNEL:-release}"
+	ARCH="$(uname -m)"
+
+	case "$ARCH" in
+		aarch64|arm64|x86_64)
+			;;
+		*)
+			echo "Unsupported architecture $ARCH. Only 64-bit x86 or ARM machines are supported."
+			exit 1
+			;;
+	esac
 
 	case "$CHANNEL" in
 		release|beta|nightly)
 			;;
 		*)
-			echo "unsupported channel $CHANNEL"
+			echo "Unsupported channel $CHANNEL. Only release, beta and nightly are supported."
 			exit 1
 			;;
 	esac
