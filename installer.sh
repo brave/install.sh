@@ -50,7 +50,14 @@ main() {
 		#  - VERSION_ID: the numeric release version for the OS, if any (e.g. "18.04")
 		#  - VERSION_CODENAME: the codename of the OS release, if any (e.g. "buster")
 		#  - UBUNTU_CODENAME: if it exists, use instead of VERSION_CODENAME
-		. /etc/os-release # TODO: grep for the needed variables instead?
+
+		os() { grep "^${1:?}=" /etc/os-release|cut -d= -f2|tr -d \"\'; }
+
+		ID="$(os ID)"
+		VERSION_ID="$(os VERSION_ID)"
+		VERSION_CODENAME="$(os VERSION_CODENAME)"
+		UBUNTU_CODENAME="$(os UBUNTU_CODENAME)"
+
 		case "$ID" in
 			ubuntu|pop|neon|zorin|tuxedo)
 				OS="ubuntu"
