@@ -356,11 +356,16 @@ main() {
 			set +x
 		;;
 		yum)
+			if ! command -v yum-config-manager >/dev/null; then
+				set -x
+				$SUDO yum install yum-utils -y
+				set +x
+			fi
 			set -x
-			$SUDO yum install yum-utils -y
-			$SUDO yum-config-manager -y --add-repo "https://pkgs.tailscale.com/$CHANNEL/$OS/$VERSION/tailscale.repo"
-			$SUDO yum install tailscale -y
-			$SUDO systemctl enable --now tailscaled
+			# TODO: support other channels
+			$SUDO yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+			$SUDO rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+			$SUDO yum install brave-browser -y
 			set +x
 		;;
 		dnf)
