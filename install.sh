@@ -25,7 +25,7 @@ main() {
     ## Check if the browser can run on this system
 
     if [ "$(printf "%s\n%s" "$GLIBC_VER" "$GLIBC_VER_MIN"|sort -V|head -n1)" != "$GLIBC_VER_MIN" ]; then
-        error "Unsupported glibc version $GLIBC_VER. Only versions >=$GLIBC_VER_MIN are supported."
+        error "Unsupported glibc version ${GLIBC_VER:-<empty>}. Only glibc versions >=$GLIBC_VER_MIN are supported."
     fi
 
     case "$ARCH" in
