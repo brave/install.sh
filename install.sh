@@ -6,6 +6,7 @@
 # This script installs the Brave browser using the OS's package manager
 
 # TODO: add support for other channels than release
+# TODO: curl/wget are only needed on deb-based distros now, could move the check there
 
 set -eu
 
@@ -114,7 +115,6 @@ main() {
     fi
 
     echo "Installation complete! Start Brave by typing brave-browser." # TODO: this is not correct on all distros
-    echo
 }
 
 main
