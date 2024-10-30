@@ -99,7 +99,9 @@ main() {
         elif is_command yay; then
             AUR_HELPER="yay"
         else
-            error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed."
+            error \
+                "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
+                "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
         set -x
         "$AUR_HELPER" -S brave-bin
