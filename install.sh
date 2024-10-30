@@ -100,7 +100,7 @@ main() {
             AUR_HELPER="yay"
         else
             error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
-                  "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
+                "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
         set -x
         "$AUR_HELPER" -S brave-bin
@@ -109,10 +109,11 @@ main() {
         error "Please download Brave for macOS from https://brave.com/download/"
     else
         error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
-              "If you'd like us to support your system better, please file an issue at" \
-              "https://github.com/brave/brave-browser/issues and include the following information:" "" \
-              "$(uname -srvmo)" "" \
-              "$(cat /etc/os-release)"
+            \
+            "If you'd like us to support your system better, please file an issue at" \
+            "https://github.com/brave/brave-browser/issues and include the following information:" "" \
+            "$(uname -srvmo)" "" \
+            "$(cat /etc/os-release)"
     fi
 
     echo "Installation complete! Start Brave by typing $([ "${AUR_HELPER:-}" ] && echo brave || echo brave-browser)."
