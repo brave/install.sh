@@ -11,7 +11,7 @@
 set -eu
 
 # Helpers
-error() { echo "Error: ${*:?}" >&2; exit 1; }
+error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 is_command() { command -v "${1:?}" >/dev/null; }
 
 # All the code is wrapped in a main function that gets called at the
@@ -107,7 +107,12 @@ main() {
     elif [ "$(uname)" = Darwin ]; then
         error "Please download Brave for macOS from https://brave.com/download/"
     else
-        error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported."
+        error \
+            "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
+            "If you'd like us to support your system better, please file an issue at" \
+            "https://github.com/brave/brave-browser/issues and include the following information:" "" \
+            "$(uname -srvmo)" "" \
+            "$(cat /etc/os-release)"
     fi
 
     echo "Installation complete! Start Brave by typing $([ "${AUR_HELPER:-}" ] && echo brave || echo brave-browser)."
