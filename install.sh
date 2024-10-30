@@ -44,7 +44,7 @@ main() {
     if is_command curl; then
         CURL="curl -fsS"
     elif is_command wget; then
-        CURL="wget -q -O-"
+        CURL="wget -qO-"
     else
         error "Please install curl or wget to proceed."
     fi
