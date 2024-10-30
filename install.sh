@@ -59,8 +59,10 @@ main() {
         export DEBIAN_FRONTEND=noninteractive
         set -x
         $SUDO mkdir -p --mode=0755 /usr/share/keyrings
-        $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" | $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
-        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"| $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list
+        $CURL "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
+            $SUDO tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
+        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
+            $SUDO tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
         $SUDO apt-get update
         $SUDO apt-get install -y brave-browser
         set +x
