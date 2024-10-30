@@ -19,7 +19,6 @@ is_command() { command -v "${1:?}" >/dev/null; }
 # up executing half a script.
 main() {
     ARCH="$(uname -m)"
-    CHANNEL="${CHANNEL:-release}"
     GLIBC_VER="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
     GLIBC_VER_MIN="2.26"
 
@@ -32,11 +31,6 @@ main() {
     case "$ARCH" in
         aarch64|arm64|x86_64) ;;
         *) error "Unsupported architecture $ARCH. Only 64-bit x86 or ARM machines are supported.";;
-    esac
-
-    case "$CHANNEL" in
-        release|beta|nightly) ;;
-        *) error "Unsupported channel $CHANNEL. Only release, beta and nightly are supported.";;
     esac
 
     ## Locate necessary tools
