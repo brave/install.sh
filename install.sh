@@ -110,7 +110,7 @@ main() {
         error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported."
     fi
 
-    echo "Installation complete! Start Brave by typing brave-browser." # TODO: this is not correct on all distros
+    echo "Installation complete! Start Brave by typing $([ "${AUR_HELPER:-}" ] && echo brave || echo brave-browser)."
 }
 
 main
