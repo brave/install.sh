@@ -74,9 +74,7 @@ main() {
         show $sudo dnf install -y brave-browser
 
     elif available yum; then
-        if ! available yum-config-manager; then
-            show $sudo yum install yum-utils -y
-        fi
+        available yum-config-manager || show $sudo yum install yum-utils -y
         show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo yum install brave-browser -y
