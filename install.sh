@@ -8,8 +8,8 @@
 set -eu
 
 # Helpers
-error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 available() { command -v "${1:?}" >/dev/null; }
+error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 show() { (set -x; "$@"); }
 
 # All the code is wrapped in a main function that gets called at the
