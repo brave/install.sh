@@ -109,7 +109,9 @@ main() {
             set +x
         fi
     elif [ "$(uname)" = Darwin ]; then
-        error "Please download Brave for macOS from https://brave.com/download/"
+        set -x
+        NONINTERACTIVE=1 brew install --cask brave-browser
+        set +x
     else
         error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
