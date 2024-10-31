@@ -9,7 +9,7 @@ set -eu
 
 # Helpers
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
-is_command() { command -v "${1:?}" >/dev/null; }
+available() { command -v "${1:?}" >/dev/null; }
 show() { (set -x; "$@"); }
 
 # All the code is wrapped in a main function that gets called at the
@@ -35,19 +35,19 @@ main() {
 
     if [ "$(id -u)" = 0 ]; then
         sudo=""
-    elif is_command sudo; then
+    elif available sudo; then
         sudo="sudo"
-    elif is_command doas; then
+    elif available doas; then
         sudo="doas"
     else
         error "Please install sudo or doas (or run this script as root) to proceed."
     fi
 
-    if is_command curl; then
+    if available curl; then
         curl="curl -fsS"
-    elif is_command wget; then
+    elif available wget; then
         curl="wget -qO-"
-    elif is_command apt-get; then
+    elif available apt-get; then
         curl="curl -fsS"
         export DEBIAN_FRONTEND=noninteractive
         show $sudo apt-get update
@@ -56,7 +56,7 @@ main() {
 
     ## Install the browser
 
-    if is_command apt-get; then
+    if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
         show $sudo mkdir -p --mode=0755 /usr/share/keyrings
         # shellcheck disable=SC2086 # due to show + $curl
@@ -66,40 +66,40 @@ main() {
             show $sudo tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
         show $sudo apt-get update
         show $sudo apt-get install -y brave-browser
-    elif is_command dnf; then
+    elif available dnf; then
         show $sudo dnf install -y 'dnf-command(config-manager)'
         show $sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo dnf install -y brave-browser
-    elif is_command yum; then
-        if ! is_command yum-config-manager; then
+    elif available yum; then
+        if ! available yum-config-manager; then
             show $sudo yum install yum-utils -y
         fi
         show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo yum install brave-browser -y
-    elif is_command zypper; then
+    elif available zypper; then
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo zypper --non-interactive ar -g -r https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
         show $sudo zypper --non-interactive install brave-browser
-    elif is_command pacman; then
+    elif available pacman; then
         pacman_opts="-Sy --needed --noconfirm"
         # shellcheck disable=SC2086 # due to show + $pacman_opts
         if pacman -Ss brave-browser >/dev/null 2>&1; then
             show $sudo pacman $pacman_opts brave-browser
-        elif is_command paru; then
+        elif available paru; then
             show paru $pacman_opts brave-bin
-        elif is_command pikaur; then
+        elif available pikaur; then
             show pikaur $pacman_opts brave-bin
-        elif is_command yay; then
+        elif available yay; then
             show yay $pacman_opts brave-bin
         else
             error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
     elif [ "$(uname)" = Darwin ]; then
-        if is_command brew; then
+        if available brew; then
             NONINTERACTIVE=1 show brew install --cask brave-browser
         else
             error "Could not find brew. Please install brew to proceed." ""\
