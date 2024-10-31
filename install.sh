@@ -108,7 +108,7 @@ main() {
             "$AUR_HELPER" -Sy --needed --noconfirm brave-bin
             set +x
         fi
-    elif [ "$(uname)" = Darwin ]; then
+    elif [ "$(uname)" = Darwin ] && is_command brew; then
         set -x
         NONINTERACTIVE=1 brew install --cask brave-browser
         set +x
