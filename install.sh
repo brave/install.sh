@@ -89,7 +89,11 @@ main() {
         $SUDO zypper --non-interactive install brave-browser
         set +x
     elif is_command pacman; then
-        if is_command paru; then
+        if pacman -Ss brave-browser >/dev/null >&1; then
+            set -x
+            pacman -Sy --needed --noconfirm brave-browser
+            set +x
+        elif is_command paru; then
             AUR_HELPER="paru"
         elif is_command pikaur; then
             AUR_HELPER="pikaur"
@@ -99,9 +103,11 @@ main() {
             error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
-        set -x
-        "$AUR_HELPER" -Sy --needed --noconfirm brave-bin
-        set +x
+        if [ "${AUR_HELPER:-}" ]; then
+            set -x
+            "$AUR_HELPER" -Sy --needed --noconfirm brave-bin
+            set +x
+        fi
     elif [ "$(uname)" = Darwin ]; then
         error "Please download Brave for macOS from https://brave.com/download/"
     else

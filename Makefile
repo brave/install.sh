@@ -1,5 +1,5 @@
 unsupported := alpine voidlinux/voidlinux-musl ubuntu_16.04 debian_9 linuxmintd/mint18-amd64 fedora_26 opensuse/leap_42.3
-supported := ubuntu_18.04 debian_10 linuxmintd/mint19-amd64 fedora_28 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 # fedora_27 hangs
+supported := ubuntu_18.04 debian_10 linuxmintd/mint19-amd64 fedora_28 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 manjarolinux/base # fedora_27 hangs
 supported_deb := $(filter ubuntu% debian% linuxmint%,$(supported))
 supported_rpm := $(filter fedora% opensuse% rockylinux%,$(supported))
 distros := $(unsupported) $(supported)
@@ -25,7 +25,7 @@ $(unsupported):
 	fi
 
 $(supported_deb): setup = apt-get update -qq && apt-get install -qq curl
-$(supported_rpm): setup = true
+$(supported_rpm) manjarolinux/base: setup = true
 opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 
 $(supported):
