@@ -89,7 +89,7 @@ main() {
         $SUDO zypper --non-interactive install brave-browser
         set +x
     elif is_command pacman; then
-        if pacman -Ss brave-browser >/dev/null >&1; then
+        if pacman -Ss brave-browser >/dev/null 2>&1; then
             set -x
             $SUDO pacman -Sy --needed --noconfirm brave-browser
             set +x
