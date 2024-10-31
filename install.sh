@@ -5,9 +5,6 @@
 #
 # This script installs the Brave browser using the OS's package manager
 
-# TODO: add support for other channels than release
-# TODO: curl/wget are only needed on deb-based distros now, could move the check there
-
 set -eu
 
 # Helpers
@@ -50,6 +47,7 @@ main() {
     elif is_command doas; then
         SUDO="doas"
     else
+        # TODO: curl/wget are only needed on deb-based distros now, could move the check there
         error "Please install sudo or doas (or run this script as root) to proceed."
     fi
 
