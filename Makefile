@@ -30,7 +30,8 @@ opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 
 $(supported):
 	echo -n "Testing $(distro) (supported)... "
-	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" sh -c '$(setup) && /install.sh && brave-browser --version' >"$(log)" 2>&1; then
+	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" \
+	   sh -c '$(setup) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
 	    echo OK
 	else
 	    echo Failed && tail "$(log)" && false
