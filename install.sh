@@ -108,10 +108,15 @@ main() {
             "$AUR_HELPER" -Sy --needed --noconfirm brave-bin
             set +x
         fi
-    elif [ "$(uname)" = Darwin ] && is_command brew; then
-        set -x
-        NONINTERACTIVE=1 brew install --cask brave-browser
-        set +x
+    elif [ "$(uname)" = Darwin ]; then
+        if is_command brew; then
+            set -x
+            NONINTERACTIVE=1 brew install --cask brave-browser
+            set +x
+        else
+            error "Could not find brew. Please install brew to proceed." ""\
+                "A Brave .dmg can also be downloaded from https://brave.com/download/"
+        fi
     else
         error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
