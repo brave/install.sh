@@ -55,6 +55,7 @@ main() {
     fi
 
     ## Install the browser
+    # shellcheck disable=SC2086 # due to show()
 
     if is_command apt-get; then
         export DEBIAN_FRONTEND=noninteractive
