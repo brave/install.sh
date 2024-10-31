@@ -21,18 +21,16 @@ $(unsupported):
 	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1; then
 	    grep -q "Unsupported glibc version" "$(log)" && echo OK
 	else
-	    echo Failed && tail "$(log)" && false
+	    printf "Failed\n\n" && tail -v "$(log)" && false
 	fi
 
-$(supported_deb): setup = apt-get update -qq && apt-get install -qq curl
-$(supported_rpm) manjarolinux/base: setup = true
 opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 
 $(supported):
 	echo -n "Testing $(distro) (supported)... "
 	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" \
-	   sh -c '$(setup) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
+	   sh -c '$(or $(setup),true) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
 	    echo OK
 	else
-	    echo Failed && tail "$(log)" && false
+	    printf "Failed\n\n" && tail -v "$(log)" && false
 	fi

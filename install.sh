@@ -30,15 +30,7 @@ main() {
         *) error "Unsupported architecture $ARCH. Only 64-bit x86 or ARM machines are supported.";;
     esac
 
-    ## Locate necessary tools
-
-    if is_command curl; then
-        CURL="curl -fsS"
-    elif is_command wget; then
-        CURL="wget -qO-"
-    elif is_command apt-get; then
-        error "Please install curl or wget to proceed."
-    fi
+    ## Find and/or install necessary tools
 
     if [ "$(id -u)" = 0 ]; then
         SUDO=""
@@ -48,6 +40,19 @@ main() {
         SUDO="doas"
     else
         error "Please install sudo or doas (or run this script as root) to proceed."
+    fi
+
+    if is_command curl; then
+        CURL="curl -fsS"
+    elif is_command wget; then
+        CURL="wget -qO-"
+    elif is_command apt-get; then
+        CURL="curl -fsS"
+        export DEBIAN_FRONTEND=noninteractive
+        set -x
+        $SUDO apt-get update
+        $SUDO apt-get install -y curl
+        set +x
     fi
 
     ## Install the browser
