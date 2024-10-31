@@ -100,7 +100,7 @@ main() {
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
         set -x
-        "$AUR_HELPER" -S --noconfirm brave-bin
+        "$AUR_HELPER" -Sy --needed --noconfirm brave-bin
         set +x
     elif [ "$(uname)" = Darwin ]; then
         error "Please download Brave for macOS from https://brave.com/download/"
