@@ -91,7 +91,7 @@ main() {
     elif is_command pacman; then
         if pacman -Ss brave-browser >/dev/null >&1; then
             set -x
-            pacman -Sy --needed --noconfirm brave-browser
+            $SUDO pacman -Sy --needed --noconfirm brave-browser
             set +x
         elif is_command paru; then
             AUR_HELPER="paru"
