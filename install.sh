@@ -37,8 +37,7 @@ main() {
     elif is_command wget; then
         CURL="wget -qO-"
     else
-        # TODO: curl/wget are only needed on deb-based distros now, could move the check there
-        error "Please install curl or wget to proceed."
+        is_command apt-get && error "Please install curl or wget to proceed."
     fi
 
     if [ "$(id -u)" = 0 ]; then
