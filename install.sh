@@ -37,6 +37,7 @@ main() {
     elif is_command wget; then
         CURL="wget -qO-"
     else
+        # TODO: curl/wget are only needed on deb-based distros now, could move the check there
         error "Please install curl or wget to proceed."
     fi
 
@@ -47,7 +48,6 @@ main() {
     elif is_command doas; then
         SUDO="doas"
     else
-        # TODO: curl/wget are only needed on deb-based distros now, could move the check there
         error "Please install sudo or doas (or run this script as root) to proceed."
     fi
 
