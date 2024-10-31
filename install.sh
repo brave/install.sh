@@ -66,11 +66,13 @@ main() {
             show $sudo tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
         show $sudo apt-get update
         show $sudo apt-get install -y brave-browser
+
     elif available dnf; then
         show $sudo dnf install -y 'dnf-command(config-manager)'
         show $sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo dnf install -y brave-browser
+
     elif available yum; then
         if ! available yum-config-manager; then
             show $sudo yum install yum-utils -y
@@ -78,11 +80,13 @@ main() {
         show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo yum install brave-browser -y
+
     elif available zypper; then
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo zypper --non-interactive ar -g -r https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
         show $sudo zypper --non-interactive install brave-browser
+
     elif available pacman; then
         pacman_opts="-Sy --needed --noconfirm"
         # shellcheck disable=SC2086 # due to show + $pacman_opts
@@ -98,6 +102,7 @@ main() {
             error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
+
     elif [ "$(uname)" = Darwin ]; then
         if available brew; then
             NONINTERACTIVE=1 show brew install --cask brave-browser
@@ -105,6 +110,7 @@ main() {
             error "Could not find brew. Please install brew to proceed." ""\
                 "A Brave .dmg can also be downloaded from https://brave.com/download/"
         fi
+
     else
         error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
