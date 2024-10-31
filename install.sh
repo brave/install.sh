@@ -59,7 +59,7 @@ main() {
     if is_command apt-get; then
         export DEBIAN_FRONTEND=noninteractive
         show $sudo mkdir -p --mode=0755 /usr/share/keyrings
-        # shellcheck disable=SC2086 # due to show + $sudo
+        # shellcheck disable=SC2086 # due to show + $curl
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
         show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
