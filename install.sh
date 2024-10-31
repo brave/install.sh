@@ -36,8 +36,8 @@ main() {
         CURL="curl -fsS"
     elif is_command wget; then
         CURL="wget -qO-"
-    else
-        is_command apt-get && error "Please install curl or wget to proceed."
+    elif is_command apt-get; then
+        error "Please install curl or wget to proceed."
     fi
 
     if [ "$(id -u)" = 0 ]; then
