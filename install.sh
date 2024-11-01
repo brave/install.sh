@@ -39,7 +39,7 @@ main() {
         *) error "Unsupported architecture $arch. Only 64-bit x86 or ARM machines are supported.";;
     esac
 
-    ## Find and/or install necessary tools
+    ## Find and/or install the necessary tools
 
     if [ "$(id -u)" = 0 ]; then
         sudo=""
