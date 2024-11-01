@@ -48,7 +48,7 @@ main() {
     elif available doas; then
         sudo="doas"
     else
-        error "Please install sudo or doas (or run this script as root) to proceed."
+        error "Please install sudo or doas to proceed."
     fi
 
     if available curl; then
