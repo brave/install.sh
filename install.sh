@@ -23,7 +23,7 @@ main() {
     arch="$(uname -m)"
     glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
     glibc_ver_min="2.26"
-    macos_ver="$([ "$os" = Darwin ] && sw_vers -productVersion || true)"
+    macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
     macos_ver_min="11.0"
 
     case "$os" in
