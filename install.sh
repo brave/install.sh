@@ -10,6 +10,7 @@ set -eu
 # Helpers
 available() { command -v "${1:?}" >/dev/null; }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
+newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 show() { (set -x; "$@"); }
 
 # All the code is wrapped in a main function that gets called at the
@@ -18,13 +19,20 @@ show() { (set -x; "$@"); }
 main() {
     ## Check if the browser can run on this system
 
+    os="$(uname)"
     arch="$(uname -m)"
     glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
     glibc_ver_min="2.26"
+    # shellcheck disable=SC2015
+    macos_ver="$([ "$os" = Darwin ] && sw_vers -productVersion || true)"
+    macos_ver_min="11.0"
 
-    if [ "$(printf "%s\n%s" "$glibc_ver" "$glibc_ver_min"|sort -V|head -n1)" != "$glibc_ver_min" ]; then
-        error "Unsupported glibc version ${glibc_ver:-<empty>}. Only glibc versions >=$glibc_ver_min are supported."
-    fi
+    case "$os" in
+        Darwin) newer "$macos_ver" "$macos_ver_min" ||
+           error "Unsupported macOS version ${macos_ver:-<empty>}. Only macos versions >=$macos_ver_min are supported.";;
+        *) newer "$glibc_ver" "$glibc_ver_min" ||
+           error "Unsupported glibc version ${glibc_ver:-<empty>}. Only glibc versions >=$glibc_ver_min are supported.";;
+    esac
 
     case "$arch" in
         aarch64|arm64|x86_64) ;;
@@ -101,7 +109,7 @@ main() {
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
 
-    elif [ "$(uname)" = Darwin ]; then
+    elif [ "$os" = Darwin ]; then
         if available brew; then
             NONINTERACTIVE=1 show brew install --cask brave-browser
         else
