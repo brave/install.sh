@@ -29,7 +29,7 @@ main() {
 
     case "$os" in
         Darwin) newer "$macos_ver" "$macos_ver_min" ||
-           error "Unsupported macOS version ${macos_ver:-<empty>}. Only macos versions >=$macos_ver_min are supported.";;
+           error "Unsupported macOS version ${macos_ver:-<empty>}. Only macOS versions >=$macos_ver_min are supported.";;
         *) newer "$glibc_ver" "$glibc_ver_min" ||
            error "Unsupported glibc version ${glibc_ver:-<empty>}. Only glibc versions >=$glibc_ver_min are supported.";;
     esac
