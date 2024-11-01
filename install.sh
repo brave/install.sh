@@ -89,7 +89,7 @@ main() {
 
     elif available zypper; then
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-        show $sudo zypper --non-interactive ar -g -r https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo zypper --non-interactive ar --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
         show $sudo zypper --non-interactive install brave-browser
 
