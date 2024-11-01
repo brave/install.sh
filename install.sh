@@ -23,7 +23,6 @@ main() {
     arch="$(uname -m)"
     glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
     glibc_ver_min="2.26"
-    # shellcheck disable=SC2015
     macos_ver="$([ "$os" = Darwin ] && sw_vers -productVersion || true)"
     macos_ver_min="11.0"
 
@@ -67,7 +66,6 @@ main() {
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
         show $sudo mkdir -p --mode=0755 /usr/share/keyrings
-        # shellcheck disable=SC2086 # due to show + $curl
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
         show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
@@ -95,7 +93,6 @@ main() {
 
     elif available pacman; then
         pacman_opts="-Sy --needed --noconfirm"
-        # shellcheck disable=SC2086 # due to show + $pacman_opts
         if pacman -Ss brave-browser >/dev/null 2>&1; then
             show $sudo pacman $pacman_opts brave-browser
         elif available paru; then
