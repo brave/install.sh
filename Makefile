@@ -4,20 +4,24 @@ distros := $(unsupported) $(supported)
 
 test: $(distros)
 
+shellcheck:
+	shellcheck -e SC2086 install.sh
+
 MAKEFLAGS := -rRO
 SHELL := $(shell command -v bash)
 .SHELLFLAGS := -eEo pipefail -c
 .ONESHELL:
 $(V).SILENT:
-.PHONY: test $(distros)
+.PHONY: shellcheck test $(distros)
 
 $(distros): distro = $(subst _,:,$@)
 $(distros): log = $(subst /,_,$(subst _,:,$@)).log
 
 $(unsupported):
 	echo -n "Testing $(distro) (unsupported)... "
-	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1; then
-	    grep -q "Unsupported glibc version" "$(log)" && echo OK
+	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
+	   grep -q "Unsupported glibc version" "$(log)"; then
+	    echo OK
 	else
 	    printf "Failed\n\n" && tail -v "$(log)" && false
 	fi

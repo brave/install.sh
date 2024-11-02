@@ -22,15 +22,15 @@ main() {
 
     os="$(uname)"
     arch="$(uname -m)"
-    glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
     glibc_ver_min="2.26"
-    macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
     macos_ver_min="11.0"
 
     case "$os" in
-        Darwin) newer "$macos_ver" "$macos_ver_min" ||
+        Darwin) macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
+           newer "$macos_ver" "$macos_ver_min" ||
            error "Unsupported macOS version ${macos_ver:-<empty>}. Only macOS versions >=$macos_ver_min are supported.";;
-        *) newer "$glibc_ver" "$glibc_ver_min" ||
+        *) glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
+           newer "$glibc_ver" "$glibc_ver_min" ||
            error "Unsupported glibc version ${glibc_ver:-<empty>}. Only glibc versions >=$glibc_ver_min are supported.";;
     esac
 
@@ -123,7 +123,11 @@ main() {
             "$(cat /etc/os-release)"
     fi
 
-    echo "Installation complete! Start Brave by typing $(command -v brave-browser || command -v brave)."
+    printf "Installation complete! Start Brave by typing "
+    case "$os" in
+        Darwin) echo "open -a Brave\ Browser";;
+        *) basename "$(command -v brave-browser || command -v brave)";;
+    esac
 }
 
 main
