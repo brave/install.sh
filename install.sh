@@ -29,6 +29,7 @@ main() {
         Darwin) macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
            newer "$macos_ver" "$macos_ver_min" ||
            error "Unsupported macOS version ${macos_ver:-<empty>}. Only macOS versions >=$macos_ver_min are supported.";;
+
         *) glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
            newer "$glibc_ver" "$glibc_ver_min" ||
            error "Unsupported glibc version ${glibc_ver:-<empty>}. Only glibc versions >=$glibc_ver_min are supported.";;
