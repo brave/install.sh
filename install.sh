@@ -13,6 +13,7 @@ available() { command -v "${1:?}" >/dev/null; }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 show() { (set -x; "$@"); }
+supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 
 # All the code is wrapped in a main function that gets called at the
 # bottom of the file, so that a truncated partial download doesn't end
@@ -27,12 +28,9 @@ main() {
 
     case "$os" in
         Darwin) macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
-           newer "$macos_ver" "$macos_ver_min" ||
-              error "Unsupported macOS version ${macos_ver:-<empty>}. Only macOS versions >=$macos_ver_min are supported.";;
-
+           supported macOS "$macos_ver" "$macos_ver_min";;
         *) glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
-           newer "$glibc_ver" "$glibc_ver_min" ||
-              error "Unsupported glibc version ${glibc_ver:-<empty>}. Only glibc versions >=$glibc_ver_min are supported.";;
+           supported glibc "$glibc_ver" "$glibc_ver_min";;
     esac
 
     case "$arch" in
