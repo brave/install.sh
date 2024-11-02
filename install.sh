@@ -8,13 +8,6 @@
 
 set -eu
 
-# Helpers
-available() { command -v "${1:?}" >/dev/null; }
-error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
-newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
-show() { (set -x; "$@"); }
-supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
-
 # All the code is wrapped in a main function that gets called at the
 # bottom of the file, so that a truncated partial download doesn't end
 # up executing half a script.
@@ -128,5 +121,12 @@ main() {
         *) basename "$(command -v brave-browser || command -v brave)";;
     esac
 }
+
+# Helpers
+available() { command -v "${1:?}" >/dev/null; }
+error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
+newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
+show() { (set -x; "$@"); }
+supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 
 main
