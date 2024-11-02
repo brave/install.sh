@@ -6,6 +6,10 @@
 # This script installs the Brave browser using the OS's package manager
 # Requires: sh, coreutils, grep, sudo/doas (except macOS)
 
+# Browser requirements
+GLIBC_VER_MIN="2.26"
+MACOS_VER_MIN="11.0"
+
 set -eu
 
 # All the code is wrapped in a main function that gets called at the
@@ -16,14 +20,12 @@ main() {
 
     os="$(uname)"
     arch="$(uname -m)"
-    glibc_ver_min="2.26"
-    macos_ver_min="11.0"
 
     case "$os" in
         Darwin) macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
-           supported macOS "$macos_ver" "$macos_ver_min";;
+           supported macOS "$macos_ver" "$MACOS_VER_MIN";;
         *) glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
-           supported glibc "$glibc_ver" "$glibc_ver_min";;
+           supported glibc "$glibc_ver" "$GLIBC_VER_MIN";;
     esac
 
     case "$arch" in
