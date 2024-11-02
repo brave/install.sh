@@ -1,4 +1,4 @@
-Script to detect the OS version and install the recommend version of Brave.
+Script to install the Brave browser.
 
 It is designed to be piped directly into `sh`.
 
