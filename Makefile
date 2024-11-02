@@ -12,10 +12,10 @@ SHELL := $(shell command -v bash)
 .SHELLFLAGS := -eEo pipefail -c
 .ONESHELL:
 $(V).SILENT:
-.PHONY: shellcheck test $(distros)
+.PHONY: clean shellcheck test $(distros) $(distros:%=%_clean)
 
 $(distros): distro = $(subst _,:,$@)
-$(distros): log = $(subst /,_,$(subst _,:,$@)).log
+$(distros) $(distros:%=%_clean): log = $(subst /,_,$(subst _,:,$(@:%_clean=%))).log
 
 $(unsupported):
 	echo -n "Testing $(distro) (unsupported)... "
@@ -36,3 +36,8 @@ $(supported):
 	else
 	    printf "Failed\n\n" && tail -v "$(log)" && false
 	fi
+
+clean: $(distros:%=%_clean)
+
+$(distros:%=%_clean):
+	rm -f "$(log)"
