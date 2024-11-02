@@ -112,7 +112,7 @@ main() {
     else
         error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
-            "https://github.com/brave/brave-browser/issues and include the following information:" "" \
+            "https://github.com/brave/install.sh/issues and include the following information:" "" \
             "$(uname -srvmo)" "" \
             "$(cat /etc/os-release)"
     fi
