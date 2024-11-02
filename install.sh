@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script installs the Brave browser using the OS's package manager
-# Requires: sh, coreutils, grep, sudo/doas
+# Requires: sh, coreutils, grep, sudo/doas (except macOS)
 
 set -eu
 
@@ -42,7 +42,7 @@ main() {
 
     ## Find and/or install the necessary tools
 
-    if [ "$(id -u)" = 0 ]; then
+    if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ]; then
         sudo=""
     elif available sudo; then
         sudo="sudo"
