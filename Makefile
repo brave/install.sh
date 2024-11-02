@@ -4,9 +4,6 @@ distros := $(unsupported) $(supported)
 
 test: $(distros)
 
-shellcheck:
-	shellcheck -e SC2086 install.sh
-
 MAKEFLAGS := -rRO
 SHELL := $(shell command -v bash)
 .SHELLFLAGS := -eEo pipefail -c
@@ -36,6 +33,9 @@ $(supported):
 	else
 	    printf "Failed\n\n" && tail -v "$(log)" && false
 	fi
+
+shellcheck:
+	shellcheck -e SC2086 install.sh
 
 clean: $(distros:%=%_clean)
 
