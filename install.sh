@@ -5,6 +5,7 @@
 #
 # This script installs the Brave browser using the OS's package manager
 # Requires: sh, coreutils, grep, sudo/doas (except macOS)
+# Source: https://github.com/brave/install.sh
 
 # Browser requirements
 GLIBC_VER_MIN="2.26"
