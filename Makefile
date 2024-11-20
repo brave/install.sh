@@ -15,7 +15,7 @@ $(distros): distro = $(subst _,:,$@)
 $(distros) $(distros:%=%_clean): log = $(subst /,_,$(subst _,:,$(@:%_clean=%))).log
 
 $(unsupported):
-	echo -n "Testing $(distro) (unsupported)... "
+	printf "Testing $(distro) (unsupported)... "
 	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
 	   grep -q "Unsupported glibc version" "$(log)"; then
 	    echo OK
@@ -26,7 +26,7 @@ $(unsupported):
 opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 
 $(supported):
-	echo -n "Testing $(distro) (supported)... "
+	printf "Testing $(distro) (supported)... "
 	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" \
 	   sh -c '$(or $(setup),true) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
 	    echo OK

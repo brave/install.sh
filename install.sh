@@ -76,6 +76,10 @@ main() {
         show $sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         show $sudo dnf install -y brave-browser
 
+    elif available eopkg; then
+        show $sudo eopkg update-repo -y
+        show $sudo eopkg install -y brave
+
     elif available yum; then
         available yum-config-manager || show $sudo yum install yum-utils -y
         show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
@@ -112,7 +116,7 @@ main() {
         fi
 
     else
-        error "Could not find a supported package manager. Only apt, dnf, paru/pikaur/yay, yum and zypper are supported." "" \
+        error "Could not find a supported package manager. Only apt, dnf, eopkg, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
             "https://github.com/brave/install.sh/issues and include the following information:" "" \
             "$(uname -srvmo)" "" \
@@ -130,7 +134,7 @@ main() {
 available() { command -v "${1:?}" >/dev/null; }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
-show() { (set -x; "$@"); }
+show() { (set -x; "${@:?}"); }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 
 main
