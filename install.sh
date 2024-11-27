@@ -73,7 +73,7 @@ main() {
     elif available dnf; then
         show $sudo dnf install -y 'dnf-command(config-manager)'
         if dnf --version|grep -q dnf5; then
-            show $sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/FIXME.repo
+            show $sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         else
             show $sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         fi
