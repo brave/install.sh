@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script installs the Brave browser using the OS's package manager
-# Requires: sh, coreutils, grep, sudo/doas (except macOS)
+# Requires: coreutils, grep, sh, sudo/doas (except macOS)
 # Source: https://github.com/brave/install.sh
 
 # Browser requirements
@@ -73,7 +73,7 @@ main() {
     elif available dnf; then
         show $sudo dnf install -y 'dnf-command(config-manager)'
         if dnf --version|grep -q dnf5; then
-            show $sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+            show $sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         else
             show $sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         fi
