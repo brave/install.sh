@@ -114,8 +114,9 @@ main() {
             echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
         else
             if available curl || available wget; then
-                show $curl -L https://laptop-updates.brave.com/latest/osx >~/Downloads/Brave-Browser.dmg
-                show open ~/Downloads/Brave-Browser.dmg
+                dmg="$(mktemp ~/Downloads/Brave-Browser-XXXXXXXX.dmg)"
+                show $curl -L https://laptop-updates.brave.com/latest/osx >"${dmg:?}"
+                show open "$dmg"
             else
                 show open https://laptop-updates.brave.com/latest/osx
             fi
