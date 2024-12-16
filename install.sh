@@ -111,9 +111,16 @@ main() {
     elif [ "$os" = Darwin ]; then
         if available brew; then
             NONINTERACTIVE=1 show brew install --cask brave-browser
+            echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
         else
-            error "Could not find brew. Please install brew to proceed." ""\
-                "A Brave .dmg can also be downloaded from https://brave.com/download/"
+            if available curl || available wget; then
+                dmg="$(mktemp ~/Downloads/Brave-Browser-XXXXXXXX.dmg)"
+                show $curl -L https://laptop-updates.brave.com/latest/osx >"${dmg:?}"
+                show open "$dmg"
+            else
+                show open https://laptop-updates.brave.com/latest/osx
+            fi
+            echo "Please follow the usual installation steps with the downloaded Brave-Browser.dmg"
         fi
 
     else
@@ -121,14 +128,13 @@ main() {
             "If you'd like us to support your system better, please file an issue at" \
             "https://github.com/brave/install.sh/issues and include the following information:" "" \
             "$(uname -srvmo)" "" \
-            "$(cat /etc/os-release)"
+            "$(cat /etc/os-release || true)"
     fi
 
-    printf "Installation complete! Start Brave by typing "
-    case "$os" in
-        Darwin) echo "open -a Brave\ Browser";;
-        *) basename "$(command -v brave-browser || command -v brave)";;
-    esac
+    if [ "$os" != Darwin ]; then
+        printf "Installation complete! Start Brave by typing: "
+        basename "$(command -v brave-browser || command -v brave)"
+    fi
 }
 
 # Helpers
