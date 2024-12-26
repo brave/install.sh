@@ -44,7 +44,6 @@ main() {
 
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
-        apt_arch=$([ "$arch" = "x86_64" ] && echo "amd64" || echo "arm64")
         if ! available curl && ! available wget; then
             show $sudo apt-get update
             show $sudo apt-get install -y curl
