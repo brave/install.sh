@@ -16,11 +16,11 @@ $(distros) $(distros:%=%_clean): log = $(subst /,_,$(subst _,:,$(@:%_clean=%))).
 
 $(unsupported):
 	printf "Testing $(distro) (unsupported)... "
-	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
-	   grep -q "Unsupported glibc version" "$(log)"; then
-	    echo OK
-	else
-	    printf "Failed\n\n" && tail -v "$(log)" && false
+	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 && \
+		grep -q "Unsupported glibc version" "$(log)"; then \
+		echo OK; \
+	else \
+		printf "Failed\n\n" && tail -v "$(log)" && false; \
 	fi
 
 opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
@@ -28,10 +28,10 @@ opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 $(supported):
 	printf "Testing $(distro) (supported)... "
 	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" \
-	   sh -c '$(or $(setup),true) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
-	    echo OK
-	else
-	    printf "Failed\n\n" && tail -v "$(log)" && false
+		sh -c '$(or $(setup),true) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then \
+		echo OK; \
+	else \
+		printf "Failed\n\n" && tail -v "$(log)" && false; \
 	fi
 
 shellcheck:
