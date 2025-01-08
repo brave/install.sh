@@ -111,8 +111,8 @@ main() {
         fi
 
     elif [ "$os" = Darwin ]; then
-        trap "show hdiutil detach -force /Volumes/Brave\ Browser" EXIT
-        show hdiutil attach https://laptop-updates.brave.com/latest/osx
+        trap "hdiutil detach -force -quiet /Volumes/Brave\ Browser" EXIT
+        show hdiutil attach -quiet https://laptop-updates.brave.com/latest/osx
         show cp -a /Volumes/Brave\ Browser/Brave\ Browser.app /Applications/
         echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
         exit
