@@ -111,19 +111,11 @@ main() {
         fi
 
     elif [ "$os" = Darwin ]; then
-        if available brew; then
-            NONINTERACTIVE=1 show brew install --cask brave-browser
-            echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
-        else
-            if available curl || available wget; then
-                dmg="$(mktemp ~/Downloads/Brave-Browser-XXXXXXXX.dmg)"
-                show $curl -L https://laptop-updates.brave.com/latest/osx >"${dmg:?}"
-                show open "$dmg"
-            else
-                show open https://laptop-updates.brave.com/latest/osx
-            fi
-            echo "Please follow the usual installation steps with the downloaded Brave-Browser.dmg"
-        fi
+        show hdiutil attach https://laptop-updates.brave.com/latest/osx
+        show cp -a /Volumes/Brave\ Browser/Brave\ Browser.app /Applications/
+        show hdiutil detach -force /Volumes/Brave\ Browser || true
+        echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
+        exit
 
     else
         error "Could not find a supported package manager. Only apt, dnf, eopkg, paru/pikaur/yay, yum and zypper are supported." "" \
@@ -133,10 +125,8 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if [ "$os" != Darwin ]; then
-        printf "Installation complete! Start Brave by typing: "
-        basename "$(command -v brave-browser || command -v brave)"
-    fi
+    printf "Installation complete! Start Brave by typing: "
+    basename "$(command -v brave-browser || command -v brave)"
 }
 
 # Helpers
