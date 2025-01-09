@@ -36,7 +36,7 @@ main() {
 
     ## Find and/or install the necessary tools
 
-    if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ]; then
+    if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ] && id -Gn|grep -qw admin; then
         sudo=""
     elif available sudo; then
         sudo="sudo"
@@ -111,10 +111,10 @@ main() {
         fi
 
     elif [ "$os" = Darwin ]; then
-        trap "hdiutil detach -force -quiet /Volumes/Brave\ Browser" EXIT
-        show hdiutil attach -quiet https://laptop-updates.brave.com/latest/osx
-        show rsync -a --del /Volumes/Brave\ Browser/Brave\ Browser.app /Applications/
-        show hdiutil detach -force -quiet /Volumes/Brave\ Browser || true
+        trap "$sudo hdiutil detach -force -quiet /Volumes/Brave\ Browser" EXIT
+        show $sudo hdiutil attach -quiet https://laptop-updates.brave.com/latest/osx
+        show $sudo rsync -a --del /Volumes/Brave\ Browser/Brave\ Browser.app /Applications/
+        show $sudo hdiutil detach -force -quiet /Volumes/Brave\ Browser || true
         echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
         exit
 
