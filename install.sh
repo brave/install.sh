@@ -36,7 +36,7 @@ main() {
 
     ## Find and/or install the necessary tools
 
-    if [ "$(id -u)" = 0 ] || ( [ "$os" = Darwin ] && id -Gn|grep -qw admin ); then
+    if am_admin; then
         sudo=""
     elif available sudo; then
         sudo="sudo"
@@ -131,6 +131,7 @@ main() {
 }
 
 # Helpers
+am_admin() { [ "$(id -u)" = 0 ] || ( [ "$os" = Darwin ] && id -Gn|grep -qw admin ); }
 available() { command -v "${1:?}" >/dev/null; }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
