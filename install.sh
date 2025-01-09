@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script installs the Brave browser using the OS's package manager
-# Requires: coreutils, grep, sh, sudo/doas (except macOS)
+# Requires: coreutils, grep, sh, sudo/doas
 # Source: https://github.com/brave/install.sh
 
 # Browser requirements
