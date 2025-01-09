@@ -36,7 +36,7 @@ main() {
 
     ## Find and/or install the necessary tools
 
-    if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ] && id -Gn|grep -qw admin; then
+    if [ "$(id -u)" = 0 ] || ( [ "$os" = Darwin ] && id -Gn|grep -qw admin ); then
         sudo=""
     elif available sudo; then
         sudo="sudo"
