@@ -131,7 +131,7 @@ main() {
 }
 
 # Helpers
-am_admin() { [ "$(id -u)" = 0 ] || ( [ "$os" = Darwin ] && id -Gn|grep -qw admin ); }
+am_admin() { [ "$(id -u)" = 0 ] || ( [ "$os" = Darwin ] && id -Gn|grep -Fwq admin ); }
 available() { command -v "${1:?}" >/dev/null; }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
