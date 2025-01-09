@@ -111,7 +111,7 @@ main() {
         fi
 
     elif [ "$os" = Darwin ]; then
-        trap "$sudo hdiutil detach -force -quiet /Volumes/Brave\ Browser" EXIT
+        trap '$sudo hdiutil detach -force -quiet /Volumes/Brave\ Browser' EXIT
         show $sudo hdiutil attach -quiet https://laptop-updates.brave.com/latest/osx
         show $sudo rsync -a --del /Volumes/Brave\ Browser/Brave\ Browser.app /Applications/
         show $sudo hdiutil detach -force -quiet /Volumes/Brave\ Browser || true
