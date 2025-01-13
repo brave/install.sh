@@ -42,6 +42,8 @@ main() {
         sudo="sudo"
     elif available doas; then
         sudo="doas"
+    elif available run0; then
+        sudo="run0"
     else
         error "Please install sudo or doas to proceed."
     fi
