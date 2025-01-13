@@ -58,7 +58,7 @@ main() {
         show $sudo apt-get update
         show $sudo apt-get install -y curl
     elif available rpm-ostree; then
-        $sudo rpm-ostree install --idempotent curl
+        show $sudo rpm-ostree install --idempotent curl
     fi
 
     ## Install the browser
