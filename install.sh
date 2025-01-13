@@ -34,7 +34,7 @@ main() {
         *) error "Unsupported architecture $arch. Only 64-bit x86 or ARM machines are supported.";;
     esac
 
-    ## Find and/or install the necessary tools
+    ## Locate the necessary tools
 
     if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ]; then
         sudo=""
@@ -45,7 +45,7 @@ main() {
     elif available run0; then
         sudo="run0"
     else
-        error "Please install sudo or doas to proceed."
+        error "Please install sudo/doas/run0 to proceed."
     fi
 
     if available curl; then
@@ -54,17 +54,16 @@ main() {
         curl="wget -qO-"
     else
         curl="curl -fsS"
-        if available apt-get; then
-            export DEBIAN_FRONTEND=noninteractive
-            show $sudo apt-get update
-            show $sudo apt-get install -y curl
-        fi
     fi
 
     ## Install the browser
 
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
+        if ! available curl && ! available wget; then
+            show $sudo apt-get update
+            show $sudo apt-get install -y curl
+        fi
         show $sudo mkdir -p --mode=0755 /usr/share/keyrings
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
