@@ -57,6 +57,8 @@ main() {
         export DEBIAN_FRONTEND=noninteractive
         show $sudo apt-get update
         show $sudo apt-get install -y curl
+    elif available rpm-ostree; then
+        $sudo rpm-ostree install --idempotent curl
     fi
 
     ## Install the browser
@@ -84,6 +86,10 @@ main() {
     elif available eopkg; then
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
+
+    elif available rpm-ostree; then
+        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
+        show $sudo rpm-ostree install --idempotent brave-browser
 
     elif available yum; then
         available yum-config-manager || show $sudo yum install yum-utils -y
