@@ -58,8 +58,6 @@ main() {
             export DEBIAN_FRONTEND=noninteractive
             show $sudo apt-get update
             show $sudo apt-get install -y curl
-        elif ! available dnf && ! available yum && available rpm-ostree; then
-            show $sudo rpm-ostree install --idempotent curl
         fi
     fi
 
@@ -115,6 +113,7 @@ main() {
         show $sudo zypper --non-interactive install brave-browser
 
     elif available rpm-ostree; then
+        available curl || available wget || show $sudo rpm-ostree install --idempotent curl
         show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
         show $sudo rpm-ostree install --idempotent brave-browser
 
