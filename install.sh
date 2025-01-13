@@ -87,20 +87,6 @@ main() {
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
-    elif available rpm-ostree; then
-        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
-        show $sudo rpm-ostree install --idempotent brave-browser
-
-    elif available yum; then
-        available yum-config-manager || show $sudo yum install yum-utils -y
-        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        show $sudo yum install brave-browser -y
-
-    elif available zypper; then
-        show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
-        show $sudo zypper --non-interactive install brave-browser
-
     elif available pacman; then
         pacman_opts="-Sy --needed --noconfirm"
         if pacman -Ss brave-browser >/dev/null 2>&1; then
@@ -115,6 +101,20 @@ main() {
             error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
+
+    elif available yum; then
+        available yum-config-manager || show $sudo yum install yum-utils -y
+        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo yum install brave-browser -y
+
+    elif available zypper; then
+        show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
+        show $sudo zypper --non-interactive install brave-browser
+
+    elif available rpm-ostree; then
+        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
+        show $sudo rpm-ostree install --idempotent brave-browser
 
     elif [ "$os" = Darwin ]; then
         if available brew; then
