@@ -140,8 +140,11 @@ main() {
     fi
 
     if [ "$os" != Darwin ]; then
-        printf "Installation complete! Start Brave by typing: "
-        basename "$(command -v brave-browser || command -v brave)"
+        printf "Installation complete!"
+        if available brave || available brave-browser; then
+            printf " Start Brave by typing: "
+            basename "$(command -v brave-browser || command -v brave)"
+        fi
     fi
 }
 
