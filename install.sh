@@ -52,13 +52,15 @@ main() {
         curl="curl -fsS"
     elif available wget; then
         curl="wget -qO-"
-    elif available apt-get; then
+    else
         curl="curl -fsS"
-        export DEBIAN_FRONTEND=noninteractive
-        show $sudo apt-get update
-        show $sudo apt-get install -y curl
-    elif available rpm-ostree; then
-        show $sudo rpm-ostree install --idempotent curl
+        if available apt-get; then
+            export DEBIAN_FRONTEND=noninteractive
+            show $sudo apt-get update
+            show $sudo apt-get install -y curl
+        elif ! available dnf && ! available yum && available rpm-ostree; then
+            show $sudo rpm-ostree install --idempotent curl
+        fi
     fi
 
     ## Install the browser
