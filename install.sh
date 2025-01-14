@@ -112,9 +112,9 @@ main() {
         show $sudo zypper --non-interactive install brave-browser
 
     elif available rpm-ostree; then
-        available curl || available wget || show $sudo rpm-ostree install --idempotent --apply-live curl
+        available curl || available wget || ask $sudo rpm-ostree install -y --idempotent --apply-live curl
         show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
-        show $sudo rpm-ostree install --idempotent --apply-live brave-browser
+        show $sudo rpm-ostree install --idempotent brave-browser
 
     elif [ "$os" = Darwin ]; then
         if available brew; then
@@ -155,5 +155,6 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 show() { (set -x; "${@:?}"); }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
+ask() { printf "Execute: %s [Y/n] " "$@"; read -r answer; case "$answer" in ""|y|Y) show "$@";; *) exit 1;; esac; }
 
 main
