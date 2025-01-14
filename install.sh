@@ -101,15 +101,15 @@ main() {
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
 
-    elif available yum; then
-        available yum-config-manager || show $sudo yum install yum-utils -y
-        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        show $sudo yum install brave-browser -y
-
     elif available zypper; then
         show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
         show $sudo zypper --non-interactive install brave-browser
+
+    elif available yum; then
+        available yum-config-manager || show $sudo yum install yum-utils -y
+        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo yum install brave-browser -y
 
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
