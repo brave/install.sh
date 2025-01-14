@@ -34,7 +34,7 @@ main() {
         *) error "Unsupported architecture $arch. Only 64-bit x86 or ARM machines are supported.";;
     esac
 
-    ## Find and/or install the necessary tools
+    ## Locate the necessary tools
 
     if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ]; then
         sudo=""
@@ -45,24 +45,25 @@ main() {
     elif available run0; then
         sudo="run0"
     else
-        error "Please install sudo or doas to proceed."
+        error "Please install sudo/doas/run0 to proceed."
     fi
 
     if available curl; then
         curl="curl -fsS"
     elif available wget; then
         curl="wget -qO-"
-    elif available apt-get; then
+    else
         curl="curl -fsS"
-        export DEBIAN_FRONTEND=noninteractive
-        show $sudo apt-get update
-        show $sudo apt-get install -y curl
     fi
 
     ## Install the browser
 
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
+        if ! available curl && ! available wget; then
+            show $sudo apt-get update
+            show $sudo apt-get install -y curl
+        fi
         show $sudo mkdir -p --mode=0755 /usr/share/keyrings
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
@@ -85,16 +86,6 @@ main() {
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
-    elif available yum; then
-        available yum-config-manager || show $sudo yum install yum-utils -y
-        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        show $sudo yum install brave-browser -y
-
-    elif available zypper; then
-        show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
-        show $sudo zypper --non-interactive install brave-browser
-
     elif available pacman; then
         pacman_opts="-Sy --needed --noconfirm"
         if pacman -Ss brave-browser >/dev/null 2>&1; then
@@ -109,6 +100,21 @@ main() {
             error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
                 "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
         fi
+
+    elif available zypper; then
+        show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
+        show $sudo zypper --non-interactive install brave-browser
+
+    elif available yum; then
+        available yum-config-manager || show $sudo yum install yum-utils -y
+        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo yum install brave-browser -y
+
+    elif available rpm-ostree; then
+        available curl || available wget || error "Please install curl/wget to proceed."
+        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
+        show $sudo rpm-ostree install -y --idempotent brave-browser
 
     elif [ "$os" = Darwin ]; then
         if available brew; then
@@ -134,8 +140,12 @@ main() {
     fi
 
     if [ "$os" != Darwin ]; then
-        printf "Installation complete! Start Brave by typing: "
-        basename "$(command -v brave-browser || command -v brave)"
+        if available brave || available brave-browser; then
+            printf "Installation complete! Start Brave by typing: "
+            basename "$(command -v brave-browser || command -v brave)"
+        else
+            echo "Installation complete!"
+        fi
     fi
 }
 
