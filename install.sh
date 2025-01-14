@@ -114,7 +114,7 @@ main() {
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
         show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
-        show $sudo rpm-ostree install --idempotent brave-browser
+        show $sudo rpm-ostree install -y --idempotent brave-browser
 
     elif [ "$os" = Darwin ]; then
         if available brew; then
