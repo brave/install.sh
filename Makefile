@@ -24,6 +24,7 @@ $(unsupported):
 	fi
 
 opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
+manjarolinux/base: setup = pacman -Sy --noconfirm archlinux-keyring
 
 $(supported):
 	printf "Testing $(distro) (supported)... "
