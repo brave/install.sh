@@ -4,12 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script installs the Brave browser using the OS's package manager
-# Requires: coreutils, grep, sh, sudo/doas (except macOS)
+# Requires: coreutils, grep, sh, sudo/doas
 # Source: https://github.com/brave/install.sh
 
-# Browser requirements
 GLIBC_VER_MIN="2.26"
-MACOS_VER_MIN="11.0"
 
 set -eu
 
@@ -23,10 +21,8 @@ main() {
     arch="$(uname -m)"
 
     case "$os" in
-        Darwin) macos_ver="$(sw_vers -productVersion 2>/dev/null || true)"
-           supported macOS "$macos_ver" "$MACOS_VER_MIN";;
-        *) glibc_ver="$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)"
-           supported glibc "$glibc_ver" "$GLIBC_VER_MIN";;
+        Darwin) echo "Please go to https://brave.com/download/ to download the Mac app"; exit 2;;
+        *) glibc_supported;;
     esac
 
     case "$arch" in
@@ -36,7 +32,7 @@ main() {
 
     ## Locate the necessary tools
 
-    if [ "$(id -u)" = 0 ] || [ "$os" = Darwin ]; then
+    if [ "$(id -u)" = 0 ]; then
         sudo=""
     elif available sudo; then
         sudo="sudo"
@@ -116,21 +112,6 @@ main() {
         show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
         show $sudo rpm-ostree install -y --idempotent brave-browser
 
-    elif [ "$os" = Darwin ]; then
-        if available brew; then
-            NONINTERACTIVE=1 show brew install --cask brave-browser
-            echo "Installation complete! Start Brave by typing: open -a Brave\ Browser"
-        else
-            if available curl || available wget; then
-                dmg="$(mktemp ~/Downloads/Brave-Browser-XXXXXXXX.dmg)"
-                show $curl -L https://laptop-updates.brave.com/latest/osx >"${dmg:?}"
-                show open "$dmg"
-            else
-                show open https://laptop-updates.brave.com/latest/osx
-            fi
-            echo "Please follow the usual installation steps with the downloaded Brave-Browser.dmg"
-        fi
-
     else
         error "Could not find a supported package manager. Only apt, dnf, eopkg, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
@@ -139,13 +120,11 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if [ "$os" != Darwin ]; then
-        if available brave || available brave-browser; then
-            printf "Installation complete! Start Brave by typing: "
-            basename "$(command -v brave-browser || command -v brave)"
-        else
-            echo "Installation complete!"
-        fi
+    if available brave || available brave-browser; then
+        printf "Installation complete! Start Brave by typing: "
+        basename "$(command -v brave-browser || command -v brave)"
+    else
+        echo "Installation complete!"
     fi
 }
 
@@ -155,5 +134,6 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 show() { (set -x; "${@:?}"); }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
+glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "$GLIBC_VER_MIN"; }
 
 main
