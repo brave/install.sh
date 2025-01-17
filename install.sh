@@ -78,7 +78,7 @@ main() {
             show $sudo pacman -Sy --needed --noconfirm brave-browser
         else
             aur_helper="$(first_of paru pikaur yay)" ||
-                error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
+                error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
                       "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
             show "$aur_helper" -Sy --needed --noconfirm brave-bin
         fi
