@@ -102,7 +102,7 @@ main() {
         error "Could not find a supported package manager. Only apt, dnf, eopkg, paru/pikaur/yay, yum and zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
             "https://github.com/brave/install.sh/issues and include the following information:" "" \
-            "$(uname -srvmo)" "" \
+            "$(uname -srvmo || true)" "" \
             "$(cat /etc/os-release || true)"
     fi
 
