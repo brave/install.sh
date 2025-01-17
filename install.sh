@@ -17,15 +17,12 @@ set -eu
 main() {
     ## Check if the browser can run on this system
 
-    os="$(uname)"
-    arch="$(uname -m)"
-
-    case "$os" in
+    case "$(uname)" in
         Darwin) echo "Please go to https://brave.com/download/ to download the Mac app"; exit 2;;
         *) glibc_supported;;
     esac
 
-    case "$arch" in
+    case "${arch:=$(uname -m)}" in
         aarch64|arm64|x86_64) ;;
         *) error "Unsupported architecture $arch. Only 64-bit x86 or ARM machines are supported.";;
     esac
@@ -34,14 +31,8 @@ main() {
 
     if [ "$(id -u)" = 0 ]; then
         sudo=""
-    elif available sudo; then
-        sudo="sudo"
-    elif available doas; then
-        sudo="doas"
-    elif available run0; then
-        sudo="run0"
     else
-        error "Please install sudo/doas/run0 to proceed."
+        sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed."
     fi
 
     if available curl; then
@@ -83,18 +74,13 @@ main() {
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        pacman_opts="-Sy --needed --noconfirm"
         if pacman -Ss brave-browser >/dev/null 2>&1; then
-            show $sudo pacman $pacman_opts brave-browser
-        elif available paru; then
-            show paru $pacman_opts brave-bin
-        elif available pikaur; then
-            show pikaur $pacman_opts brave-bin
-        elif available yay; then
-            show yay $pacman_opts brave-bin
+            show $sudo pacman -Sy --needed --noconfirm brave-browser
         else
-            error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
-                "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
+            aur_helper="$(first_of paru pikaur yay)" ||
+                error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
+                      "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
+            show "$aur_helper" -Sy --needed --noconfirm brave-bin
         fi
 
     elif available zypper; then
@@ -130,9 +116,10 @@ main() {
 
 # Helpers
 available() { command -v "${1:?}" >/dev/null; }
+first_of() { for c in "$@"; do if available "$c"; then echo "$c"; return 0; fi; done; return 1; }
+show() { (set -x; "${@:?}"); }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
-show() { (set -x; "${@:?}"); }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
 
