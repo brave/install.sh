@@ -99,12 +99,14 @@ main() {
         show $sudo rpm-ostree install -y --idempotent brave-browser
 
     else
-        error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman/paru/pikaur/rpm-ostree/yay/yum/zypper are supported." "" \
+        error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
             "https://github.com/brave/install.sh/issues and include the following information:" "" \
             "$(uname -srvmo || true)" "" \
             "$(cat /etc/os-release || true)"
     fi
+
+    ## Wrap up
 
     if available brave || available brave-browser; then
         printf "Installation complete! Start Brave by typing: "
