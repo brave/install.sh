@@ -47,12 +47,10 @@ main() {
             show $sudo apt-get update
             show $sudo apt-get install -y curl
         fi
-        show $sudo mkdir -p --mode=0755 /usr/share/keyrings
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
-            show $sudo tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
-        show $sudo chmod a+r /usr/share/keyrings/brave-browser-archive-keyring.gpg
+            show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
         show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
-            show $sudo tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
+            show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.list
         show $sudo apt-get update
         show $sudo apt-get install -y brave-browser
 
@@ -91,7 +89,8 @@ main() {
 
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
-        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
+        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|\
+            show $sudo install -DTm644 /dev/stdin /etc/yum.repos.d/brave-browser.repo
         show $sudo rpm-ostree install -y --idempotent brave-browser
 
     else
