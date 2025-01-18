@@ -22,9 +22,9 @@ main() {
         *) glibc_supported;;
     esac
 
-    case "${arch:=$(uname -m)}" in
+    case "$(uname -m)" in
         aarch64|arm64|x86_64) ;;
-        *) error "Unsupported architecture $arch. Only 64-bit x86 or ARM machines are supported.";;
+        *) error "Unsupported architecture $(uname -m). Only 64-bit x86 or ARM machines are supported.";;
     esac
 
     ## Locate the necessary tools
