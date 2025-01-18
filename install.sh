@@ -29,8 +29,8 @@ main() {
 
     ## Locate the necessary tools
 
-    case "$(id -u)" in
-        0) sudo="";;
+    case "$(whoami)" in
+        root) sudo="";;
         *) sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed.";;
     esac
 
