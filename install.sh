@@ -34,7 +34,7 @@ main() {
         *) sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed.";;
     esac
 
-    case "$(first_of curl wget || true)" in
+    case "$(first_of curl wget)" in
         wget) download="wget -qO-";;
         *) download="curl -fsS";;
     esac
