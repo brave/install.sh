@@ -18,7 +18,7 @@ main() {
     ## Check if the browser can run on this system
 
     case "$(uname)" in
-        Darwin) echo "Please go to https://brave.com/download/ to download the Mac app"; exit 2;;
+        Darwin) error "Please go to https://brave.com/download/ to download the Mac app";;
         *) glibc_supported;;
     esac
 
