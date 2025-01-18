@@ -29,19 +29,15 @@ main() {
 
     ## Locate the necessary tools
 
-    if [ "$(id -u)" = 0 ]; then
-        sudo=""
-    else
-        sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed."
-    fi
+    case "$(id -u)" in
+        0) sudo="";;
+        *) sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed.";;
+    esac
 
-    if available curl; then
-        curl="curl -fsS"
-    elif available wget; then
-        curl="wget -qO-"
-    else
-        curl="curl -fsS"
-    fi
+    case "$(first_of curl wget || true)" in
+        wget) curl="wget -qO-";;
+        *) curl="curl -fsS";;
+    esac
 
     ## Install the browser
 
