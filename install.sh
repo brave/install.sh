@@ -106,8 +106,6 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    ## Wrap up
-
     if available brave || available brave-browser; then
         printf "Installation complete! Start Brave by typing: "
         basename "$(command -v brave-browser || command -v brave)"
