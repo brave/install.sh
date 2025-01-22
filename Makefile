@@ -41,6 +41,11 @@ $(supported):
 	    printf "Failed\n\n" && tail -v "$(log)" && false
 	fi
 
+clean: $(distros:%=%_clean)
+
+$(distros:%=%_clean):
+	rm -f "$(log)"
+
 # Test helper functions from install.sh in an alpine container
 
 uts := ut_available ut_first_of ut_show ut_newer ut_supported
@@ -65,10 +70,3 @@ shellcheck:
 	printf "Analyzing install.sh with shellcheck... "
 	shellcheck -e SC2086 install.sh
 	echo OK
-
-# Clean up log files from distro tests
-
-clean: $(distros:%=%_clean)
-
-$(distros:%=%_clean):
-	rm -f "$(log)"
