@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script installs the Brave browser using the OS's package manager
-# Requires: coreutils, grep, sh, sudo/doas/run0
+# Requires: coreutils, grep, sh, sudo/doas/run0/pkexec
 # Source: https://github.com/brave/install.sh
 
 GLIBC_VER_MIN="2.26"
@@ -17,40 +17,27 @@ set -eu
 main() {
     ## Check if the browser can run on this system
 
-    os="$(uname)"
-    arch="$(uname -m)"
-
-    case "$os" in
-        Darwin) echo "Please go to https://brave.com/download/ to download the Mac app"; exit 2;;
+    case "$(uname)" in
+        Darwin) error "Please go to https://brave.com/download/ to download the Mac app";;
         *) glibc_supported;;
     esac
 
-    case "$arch" in
-        aarch64|arm64|x86_64) ;;
-        *) error "Unsupported architecture $arch. Only 64-bit x86 or ARM machines are supported.";;
+    case "$(uname -m)" in
+        aarch64|x86_64) ;;
+        *) error "Unsupported architecture $(uname -m). Only 64-bit x86 or ARM machines are supported.";;
     esac
 
     ## Locate the necessary tools
 
-    if [ "$(id -u)" = 0 ]; then
-        sudo=""
-    elif available sudo; then
-        sudo="sudo"
-    elif available doas; then
-        sudo="doas"
-    elif available run0; then
-        sudo="run0"
-    else
-        error "Please install sudo/doas/run0 to proceed."
-    fi
+    case "$(whoami)" in
+        root) sudo="";;
+        *) sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed.";;
+    esac
 
-    if available curl; then
-        curl="curl -fsS"
-    elif available wget; then
-        curl="wget -qO-"
-    else
-        curl="curl -fsS"
-    fi
+    case "$(first_of curl wget)" in
+        wget) curl="wget -qO-";;
+        *) curl="curl -fsS";;
+    esac
 
     ## Install the browser
 
@@ -60,12 +47,10 @@ main() {
             show $sudo apt-get update
             show $sudo apt-get install -y curl
         fi
-        show $sudo mkdir -p --mode=0755 /usr/share/keyrings
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
-            show $sudo tee /usr/share/keyrings/brave-browser-archive-keyring.gpg >/dev/null
-        show $sudo chmod a+r /usr/share/keyrings/brave-browser-archive-keyring.gpg
+            show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
         show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
-            show $sudo tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
+            show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.list
         show $sudo apt-get update
         show $sudo apt-get install -y brave-browser
 
@@ -83,18 +68,13 @@ main() {
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        pacman_opts="-Sy --needed --noconfirm"
         if pacman -Ss brave-browser >/dev/null 2>&1; then
-            show $sudo pacman $pacman_opts brave-browser
-        elif available paru; then
-            show paru $pacman_opts brave-bin
-        elif available pikaur; then
-            show pikaur $pacman_opts brave-bin
-        elif available yay; then
-            show yay $pacman_opts brave-bin
+            show $sudo pacman -Sy --needed --noconfirm brave-browser
         else
-            error "Could not find an AUR helper. Please install paru, pikaur, or yay to proceed." "" \
-                "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
+            aur_helper="$(first_of paru pikaur yay)" ||
+                error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
+                      "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
+            show "$aur_helper" -Sy --needed --noconfirm brave-bin
         fi
 
     elif available zypper; then
@@ -109,14 +89,15 @@ main() {
 
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
-        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|show $sudo tee /etc/yum.repos.d/brave-browser.repo >/dev/null
+        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|\
+            show $sudo install -DTm644 /dev/stdin /etc/yum.repos.d/brave-browser.repo
         show $sudo rpm-ostree install -y --idempotent brave-browser
 
     else
-        error "Could not find a supported package manager. Only apt, dnf, eopkg, paru/pikaur/yay, yum and zypper are supported." "" \
+        error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
             "https://github.com/brave/install.sh/issues and include the following information:" "" \
-            "$(uname -srvmo)" "" \
+            "$(uname -srvmo || true)" "" \
             "$(cat /etc/os-release || true)"
     fi
 
@@ -130,9 +111,10 @@ main() {
 
 # Helpers
 available() { command -v "${1:?}" >/dev/null; }
+first_of() { for c in "${@:?}"; do if available "$c"; then echo "$c"; return 0; fi; done; return 1; }
+show() { (set -x; "${@:?}"); }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
-show() { (set -x; "${@:?}"); }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
 
