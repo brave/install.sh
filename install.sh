@@ -50,7 +50,7 @@ main() {
         fi
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=$arch] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
+        show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=$apt_arch] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
             show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.list
         show $sudo apt-get update
         show $sudo apt-get install -y brave-browser
