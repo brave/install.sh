@@ -30,7 +30,7 @@ $(unsupported):
 	fi
 
 opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
-manjarolinux/base: setup = pacman -Sy --noconfirm archlinux-keyring
+manjarolinux/base: setup = mv /etc/pacman.conf{.pacnew,}
 
 $(supported):
 	printf "Testing $(distro) (supported)... "
