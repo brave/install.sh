@@ -1,5 +1,5 @@
-Script to install the Brave browser.
+Script to install the Brave browser
 
-It is designed to be piped directly into `sh`.
+It is designed to be piped directly into `sh`
 
-See https://brave.com/linux for manual installation instructions.
+See https://brave.com/linux for manual installation instructions
