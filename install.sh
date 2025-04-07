@@ -55,13 +55,13 @@ main() {
         show $sudo apt-get install -y brave-browser
 
     elif available dnf; then
-      if dnf --version|grep -q dnf5; then
-      show $sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        if dnf --version|grep -q dnf5; then
+            show $sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         else
-        show $sudo dnf install -y 'dnf-command(config-manager)'
+            show $sudo dnf install -y 'dnf-command(config-manager)'
             show $sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
         fi
-        show $sudo dnf install -y brave-browser
+            show $sudo dnf install -y brave-browser
 
     elif available eopkg; then
         show $sudo eopkg update-repo -y
