@@ -49,9 +49,16 @@ main() {
         fi
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64,arm64] https://brave-browser-apt-release.s3.brave.com/ stable main"|\
-            show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.list
-        show $sudo apt-get update
+        show echo "Types: deb\n\
+URIs: https://brave-browser-apt-release.s3.brave.com\n\
+Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\n\
+Architectures: amd64 arm64\n\
+Suites: stable\n\
+Components: main" |\
+        show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
+        
+        show $sudo apt-get update 
+        cat /etc/apt/sources.list.d/brave-browser-release.sources
         show $sudo apt-get install -y brave-browser
 
     elif available dnf; then
