@@ -8,6 +8,7 @@
 # Source: https://github.com/brave/install.sh
 
 GLIBC_VER_MIN="2.26"
+APT_GET_822_MIN_VER="1.1"
 
 set -eu
 
@@ -49,16 +50,13 @@ main() {
         fi
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        show echo "Types: deb\n\
-URIs: https://brave-browser-apt-release.s3.brave.com\n\
-Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\n\
-Architectures: amd64 arm64\n\
-Suites: stable\n\
-Components: main" |\
+        
+        define_apt_string
+        
+        show echo "${apt_string}" |\
         show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
         
         show $sudo apt-get update 
-        cat /etc/apt/sources.list.d/brave-browser-release.sources
         show $sudo apt-get install -y brave-browser
 
     elif available dnf; then
@@ -124,5 +122,12 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
-
+define_apt_string() { 
+    
+apt_string=$(if dpkg --compare-versions "$(apt-get -v | awk 'NR==1{print $2}')" gt "$APT_GET_822_MIN_VER"; then
+    show echo "Types: deb\nURIs: https://brave-browser-apt-release.s3.brave.com\nSigned-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\nArchitectures: amd64 arm64\nSuites: stable\nComponents: main"
+else
+    show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64,arm64] https://brave-browser-apt-release.s3.brave.com/ stable main"
+fi)
+}
 main
