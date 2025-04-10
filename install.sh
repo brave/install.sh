@@ -54,7 +54,7 @@ main() {
         define_apt_string
         
         show echo "${apt_string}" |\
-        show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
+        show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-release${file_extension}"
         
         show $sudo apt-get update 
         show $sudo apt-get install -y brave-browser
@@ -128,6 +128,11 @@ apt_string=$(if dpkg --compare-versions "$(apt-get -v | awk 'NR==1{print $2}')" 
     show echo "Types: deb\nURIs: https://brave-browser-apt-release.s3.brave.com\nSigned-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\nArchitectures: amd64 arm64\nSuites: stable\nComponents: main"
 else
     show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64,arm64] https://brave-browser-apt-release.s3.brave.com/ stable main"
+fi)
+file_extension=$(if show echo $apt_string | awk 'NR==1 {exit ($1 != "Types:")}'; then 
+    show echo ".sources"
+    else
+    show echo ".list"
 fi)
 }
 main
