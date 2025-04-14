@@ -44,6 +44,7 @@ main() {
 
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
+        check_apt_version
         if ! available curl && ! available wget; then
             show $sudo apt-get update
             show $sudo apt-get install -y curl
@@ -51,10 +52,8 @@ main() {
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
         
-        define_apt_string
-        
-        show echo "${apt_string}" |\
-        show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-release${file_extension}"
+        show echo "Types: deb\nURIs: https://brave-browser-apt-release.s3.brave.com\nSigned-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\nArchitectures: amd64 arm64\nSuites: stable\nComponents: main" |\
+        show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-release.sources"
         
         show $sudo apt-get update 
         show $sudo apt-get install -y brave-browser
@@ -122,17 +121,10 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
-define_apt_string() { 
-    
-apt_string=$(if dpkg --compare-versions "$(apt-get -v | awk 'NR==1{print $2}')" gt "$APT_GET_822_MIN_VER"; then
-    show echo "Types: deb\nURIs: https://brave-browser-apt-release.s3.brave.com\nSigned-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\nArchitectures: amd64 arm64\nSuites: stable\nComponents: main"
-else
-    show echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64,arm64] https://brave-browser-apt-release.s3.brave.com/ stable main"
-fi)
-file_extension=$(if show echo $apt_string | awk 'NR==1 {exit ($1 != "Types:")}'; then 
-    show echo ".sources"
-    else
-    show echo ".list"
-fi)
+check_apt_version() {
+if dpkg --compare-versions "$(apt-get -v | awk 'NR==1{print $2}')" lt "$APT_GET_822_MIN_VER"; then
+    echo "apt-get version is not supported (< $APT_GET_822_MIN_VER). Please update."
+    exit 1
+fi
 }
 main
