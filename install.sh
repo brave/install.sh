@@ -8,7 +8,7 @@
 # Source: https://github.com/brave/install.sh
 
 GLIBC_VER_MIN="2.26"
-APT_GET_822_MIN_VER="1.1"
+APT_VER_MIN="1.1"
 
 set -eu
 
@@ -44,17 +44,15 @@ main() {
 
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
-        check_apt_version
+        apt_supported
         if ! available curl && ! available wget; then
             show $sudo apt-get update
             show $sudo apt-get install -y curl
         fi
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        
-        show echo "Types: deb\nURIs: https://brave-browser-apt-release.s3.brave.com\nSigned-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg\nArchitectures: amd64 arm64\nSuites: stable\nComponents: main" |\
-        show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-release.sources"
-        
+        show printf "%s\n" "Types: deb" "URIs: https://brave-browser-apt-release.s3.brave.com" "Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg" "Architectures: amd64 arm64" "Suites: stable" "Components: main" |\
+            show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-release.sources"
         show $sudo apt-get update 
         show $sudo apt-get install -y brave-browser
 
@@ -121,10 +119,5 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
-check_apt_version() {
-if dpkg --compare-versions "$(apt-get -v | awk 'NR==1{print $2}')" lt "$APT_GET_822_MIN_VER"; then
-    echo "apt-get version is not supported (< $APT_GET_822_MIN_VER). Please update."
-    exit 1
-fi
-}
+apt_supported() { supported apt "$(apt-get -v|head -n1|cut -d' ' -f2)" "${APT_VER_MIN:?}"; }
 main
