@@ -44,6 +44,7 @@ main() {
 
     if available apt-get; then
         export DEBIAN_FRONTEND=noninteractive
+        check_apt_health
         apt_supported
         if ! available curl && ! available wget; then
             show $sudo apt-get update
@@ -120,6 +121,12 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
+check_apt_health() { 
+    if ! apt-get update >/dev/null 2>&1; then
+        show echo " The \"apt-get update\" command is not working on your system. The Brave installer cannot proceed. Please try again after fixing your system configuration."
+        exit 1
+    fi
+}
 apt_supported() { supported apt "$(apt-get -v|head -n1|cut -d' ' -f2)" "${APT_VER_MIN:?}"; }
 
 main
