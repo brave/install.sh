@@ -67,6 +67,6 @@ $(uts): ut_%:
 # Analyze install.sh with shellcheck
 
 shellcheck:
-	printf "Analyzing install.sh with shellcheck... "
+	printf "Testing install.sh with shellcheck... "
 	shellcheck -e SC2086 install.sh
 	echo OK

@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # This script installs the Brave browser using the OS's package manager
-# Requires: coreutils, grep, sh, sudo/doas/run0/pkexec
+# Requires: coreutils, grep, sh and one of sudo/doas/run0/pkexec/sudo-rs
 # Source: https://github.com/brave/install.sh
 
 GLIBC_VER_MIN="2.26"
@@ -32,7 +32,7 @@ main() {
 
     case "$(whoami)" in
         root) sudo="";;
-        *) sudo="$(first_of sudo doas run0 pkexec)" || error "Please install sudo/doas/run0/pkexec to proceed.";;
+        *) sudo="$(first_of sudo doas run0 pkexec sudo-rs)" || error "Please install sudo/doas/run0/pkexec/sudo-rs to proceed.";;
     esac
 
     case "$(first_of curl wget)" in
@@ -42,7 +42,7 @@ main() {
 
     ## Install the browser
 
-    if available apt-get; then
+    if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
         check_apt_health
         apt_supported
@@ -52,8 +52,14 @@ main() {
         fi
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        show printf "%s\n" "Types: deb" "URIs: https://brave-browser-apt-release.s3.brave.com" "Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg" "Architectures: amd64 arm64" "Suites: stable" "Components: main" |\
-            show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
+        show printf "%s\n" \
+            "Types: deb" \
+            "URIs: https://brave-browser-apt-release.s3.brave.com" \
+            "Signed-By: /usr/share/keyrings/brave-browser-archive-keyring.gpg" \
+            "Architectures: amd64 arm64" \
+            "Suites: stable" \
+            "Components: main"|\
+                show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
         show $sudo rm -f /etc/apt/sources.list.d/brave-browser-release.list
         show $sudo apt-get update
         show $sudo apt-get install -y brave-browser
