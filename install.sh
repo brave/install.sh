@@ -65,20 +65,20 @@ main() {
 
     elif available dnf; then
         if dnf --version|grep -q dnf5; then
-            show $sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+            show $sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-"${CHANNEL}".s3.brave.com/brave-browser"${CHANNELdash}".repo
         else
             show $sudo dnf install -y 'dnf-command(config-manager)'
-            show $sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+            show $sudo dnf config-manager --add-repo https://brave-browser-rpm-"${CHANNEL}".s3.brave.com/brave-browser"${CHANNELdash}".repo
         fi
-        show $sudo dnf install -y brave-browser
+        show $sudo dnf install -y brave-browser"${CHANNELdash}"
 
     elif available eopkg; then
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        if pacman -Ss brave-browser >/dev/null 2>&1; then
-            show $sudo pacman -Sy --needed --noconfirm brave-browser
+        if pacman -Ss brave-browser"${CHANNELdash}" >/dev/null 2>&1; then
+            show $sudo pacman -Sy --needed --noconfirm brave-browser"${CHANNELdash}"
         else
             aur_helper="$(first_of paru pikaur yay)" ||
                 error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
@@ -87,20 +87,20 @@ main() {
         fi
 
     elif available zypper; then
-        show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+        show $sudo zypper --non-interactive addrepo --gpgcheck --repo https://brave-browser-rpm-"${CHANNEL}".s3.brave.com/brave-browser"${CHANNELdash}".repo
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
-        show $sudo zypper --non-interactive install brave-browser
+        show $sudo zypper --non-interactive install brave-browser"${CHANNELdash}"
 
     elif available yum; then
         available yum-config-manager || show $sudo yum install yum-utils -y
-        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        show $sudo yum install brave-browser -y
+        show $sudo yum-config-manager -y --add-repo https://brave-browser-rpm-"${CHANNEL}".s3.brave.com/brave-browser"${CHANNELdash}".repo
+        show $sudo yum install brave-browser"${CHANNELdash}" -y
 
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
-        show $curl https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo|\
-            show $sudo install -DTm644 /dev/stdin /etc/yum.repos.d/brave-browser.repo
-        show $sudo rpm-ostree install -y --idempotent brave-browser
+        show $curl https://brave-browser-rpm-"${CHANNEL}".s3.brave.com/brave-browser"${CHANNELdash}".repo|\
+            show $sudo install -DTm644 /dev/stdin /etc/yum.repos.d/brave-browser"${CHANNELdash}".repo
+        show $sudo rpm-ostree install -y --idempotent brave-browser"${CHANNELdash}"
 
     else
         error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
@@ -110,9 +110,9 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if available brave || available brave-browser; then
+    if available brave || available brave-browser"${CHANNELdash}"; then
         printf "Installation complete! Start Brave by typing: "
-        basename "$(command -v brave-browser || command -v brave)"
+        basename "$(command -v brave-browser"${CHANNELdash}" || command -v brave)"
     else
         echo "Installation complete!"
     fi
