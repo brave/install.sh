@@ -9,7 +9,7 @@
 
 GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
-
+CHANNEL="${CHANNEL:-release}"
 set -eu
 
 main() {
@@ -37,6 +37,16 @@ main() {
         *) curl="curl -fsS --proto =https --tlsv1.3";;
     esac
 
+    case "$CHANNEL" in
+        release)
+        CHANNELdash="" && printf "You chouse the %s installation channel\n" "${CHANNEL}";;
+        beta|nightly) 
+        CHANNELdash="-${CHANNEL}"
+        printf "You chouse the %s installation channel\n" "${CHANNEL}"
+        ;;
+        *) error "The installation channel you chouse does not exist";;
+    esac
+
     ## Install the browser
 
     if available apt-get && apt_supported; then
@@ -45,13 +55,13 @@ main() {
             show $sudo apt-get update || apt_error
             show $sudo apt-get install -y curl
         fi
-        show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
-            show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser.sources"|\
-            show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
-        show $sudo rm -f /etc/apt/sources.list.d/brave-browser-release.list
+        show $curl "https://brave-browser-apt-${CHANNEL}.s3.brave.com/brave-browser${CHANNELdash}-archive-keyring.gpg"|\
+            show $sudo install -DTm644 /dev/stdin /usr/share/keyrings/brave-browser"${CHANNELdash}"-archive-keyring.gpg
+        show $curl "https://brave-browser-apt-${CHANNEL}.s3.brave.com/brave-browser${CHANNELdash}.sources"|\
+            show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-${CHANNEL}.sources
+        show $sudo rm -f /etc/apt/sources.list.d/brave-browser-*.list
         show $sudo apt-get update || apt_error
-        show $sudo apt-get install -y brave-browser
+        show $sudo apt-get install -y brave-browser"${CHANNELdash}"
 
     elif available dnf; then
         if dnf --version|grep -q dnf5; then
