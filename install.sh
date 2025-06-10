@@ -44,7 +44,6 @@ main() {
 
     if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
-        apt_supported
         if ! available curl && ! available wget; then
             show $sudo apt-get update || apt_error
             show $sudo apt-get install -y curl
