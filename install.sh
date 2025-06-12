@@ -45,7 +45,7 @@ main() {
     if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
         if ! available curl && ! available wget; then
-            show $sudo apt-get update
+            show $sudo apt-get update || apt_error
             show $sudo apt-get install -y curl
         fi
         show $curl "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg"|\
@@ -59,7 +59,7 @@ main() {
             "Components: main"|\
                 show $sudo install -DTm644 /dev/stdin /etc/apt/sources.list.d/brave-browser-release.sources
         show $sudo rm -f /etc/apt/sources.list.d/brave-browser-release.list
-        show $sudo apt-get update
+        show $sudo apt-get update || apt_error
         show $sudo apt-get install -y brave-browser
 
     elif available dnf; then
@@ -125,6 +125,7 @@ error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
 glibc_supported() { supported glibc "$(ldd --version 2>/dev/null|head -n1|grep -oE '[0-9]+\.[0-9]+$' || true)" "${GLIBC_VER_MIN:?}"; }
+apt_error() { error 'The "apt-get update" command is not working on your system. The Brave installer cannot proceed. Please try again after fixing your system configuration.'; }
 apt_supported() { supported apt "$(apt-get -v|head -n1|cut -d' ' -f2)" "${APT_VER_MIN:?}"; }
 
 main
