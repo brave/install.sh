@@ -37,7 +37,7 @@ main() {
 
     case "$(first_of curl wget)" in
         wget) curl="wget -qO-";;
-        *) curl="curl -fsS";;
+        *) curl="curl -fsS --proto =https --tlsv1.3";;
     esac
 
     ## Install the browser
