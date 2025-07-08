@@ -1,7 +1,7 @@
 # Distros to test install.sh on
 
 unsupported := alpine voidlinux/voidlinux-musl ubuntu_16.04 debian_9 linuxmintd/mint18-amd64 fedora_26 opensuse/leap_42.3
-supported := ubuntu_18.04 debian_10 linuxmintd/mint19-amd64 fedora_27 fedora_41 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 manjarolinux/base
+supported := ubuntu_18.04 ubuntu_24.04 debian_10 linuxmintd/mint19-amd64 fedora_27 fedora_41 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 manjarolinux/base
 distros := $(unsupported) $(supported)
 
 test: shellcheck ut $(distros)
@@ -21,7 +21,7 @@ $(distros): distro = $(subst _,:,$@)
 $(distros) $(distros:%=%_clean): log = $(subst /,_,$(subst _,:,$(@:%_clean=%))).log
 
 $(unsupported):
-	printf "Testing $(distro) (unsupported)... "
+	printf "Testing unsupported distribution $(distro)... "
 	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
 	   grep -q "Unsupported glibc version" "$(log)"; then
 	    echo OK
@@ -33,7 +33,7 @@ opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 manjarolinux/base: setup = mv /etc/pacman.conf{.pacnew,} || true
 
 $(supported):
-	printf "Testing $(distro) (supported)... "
+	printf "Testing supported distribution $(distro)... "
 	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" \
 	   sh -c '$(or $(setup),true) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
 	    echo OK
@@ -59,7 +59,7 @@ ut_newer: test = newer 1.12 1.9 && newer 0.1.1 0.0.2 && ! newer "" non-empty
 ut_supported: test = supported foo 1.12 1.9
 
 $(uts): ut_%:
-	printf "Testing $*()... "
+	printf "Testing function $*()... "
 	docker run --rm -v "$$PWD/install.sh:/install.sh" alpine \
 	    sh -$(if $(V),x,)ec 'source <(grep -x "\w\w*() {.*}" /install.sh) && $(test)'
 	echo OK
@@ -67,6 +67,6 @@ $(uts): ut_%:
 # Analyze install.sh with shellcheck
 
 shellcheck:
-	printf "Testing install.sh with shellcheck... "
+	printf "Testing script install.sh... "
 	shellcheck -e SC2086 install.sh
 	echo OK
