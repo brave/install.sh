@@ -95,8 +95,10 @@ main() {
             show $sudo install -DTm644 /dev/stdin /etc/yum.repos.d/brave-browser.repo
         show $sudo rpm-ostree install -y --idempotent brave-browser
 
+    # IMPORTANT: Always check nix-env last. It is the default on NixOS, but on other systems it may be installed as a cross-platform package manager.
+    # Prioritize native package managers first to ensure proper system integration and avoid overriding system management.
     elif available nix-env; then
-        show $sudo nix-env --install -A nixos.brave
+        show $sudo nix-env --install --attr nixos.brave
 
     else
         error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/nix-env/rpm-ostree/yum/zypper are supported." "" \
