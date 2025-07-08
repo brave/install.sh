@@ -1,7 +1,7 @@
 # Distros to test install.sh on
 
 unsupported := alpine voidlinux/voidlinux-musl ubuntu_16.04 debian_9 linuxmintd/mint18-amd64 fedora_26 opensuse/leap_42.3
-supported := ubuntu_18.04 ubuntu_24.04 debian_10 linuxmintd/mint19-amd64 fedora_27 fedora_41 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 manjarolinux/base
+supported := ubuntu_18.04 ubuntu_25.04 debian_10 linuxmintd/mint19-amd64 fedora_27 fedora_41 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 manjarolinux/base
 distros := $(unsupported) $(supported)
 
 test: shellcheck ut $(distros)
