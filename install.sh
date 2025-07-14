@@ -12,9 +12,6 @@ APT_VER_MIN="1.1"
 
 set -eu
 
-# All the code is wrapped in a main function that gets called at the
-# bottom of the file, so that a truncated partial download doesn't end
-# up executing half a script.
 main() {
     ## Check if the browser can run on this system
 
