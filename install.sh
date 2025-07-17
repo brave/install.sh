@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -eu
 # Copyright (c) Tailscale Inc
 # Copyright (c) 2024 The Brave Authors
 # SPDX-License-Identifier: BSD-3-Clause
@@ -11,8 +11,6 @@ GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
 
 CHANNEL="${CHANNEL:-release}"
-
-set -eu
 
 main() {
     ## Check if the browser can run on this system
@@ -39,6 +37,8 @@ main() {
         *) curl="curl -fsS --proto =https --tlsv1.3";;
     esac
 
+    ## Validate the browser channel
+
     case "$CHANNEL" in
         release|stable) dashCHANNEL="";;
         beta|nightly) dashCHANNEL="-$CHANNEL";;
@@ -46,6 +46,7 @@ main() {
     esac
 
     ## Install the browser
+
     echo "Installing Brave Browser ($CHANNEL)"
 
     if available apt-get && apt_supported; then
