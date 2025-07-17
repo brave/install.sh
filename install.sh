@@ -40,7 +40,7 @@ main() {
     esac
 
     case "$CHANNEL" in
-        release) dashCHANNEL="";;
+        release|stable) dashCHANNEL="";;
         beta|nightly) dashCHANNEL="-$CHANNEL";;
         *) error "Invalid channel $CHANNEL. Only release, beta and nightly are supported.";;
     esac
