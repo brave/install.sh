@@ -9,7 +9,6 @@
 
 GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
-
 CHANNEL="${CHANNEL:-release}"
 set -eu
 
@@ -81,7 +80,7 @@ main() {
             aur_helper="$(first_of paru pikaur yay)" ||
                 error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
                       "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
-            show "$aur_helper" -Sy --needed --noconfirm brave-bin
+            show "$aur_helper" -Sy --needed --noconfirm "brave$dashCHANNEL-bin"
         fi
 
     elif available zypper; then
