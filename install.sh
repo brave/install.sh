@@ -45,8 +45,8 @@ main() {
     esac
 
     ## Install the browser
-    echo "Installing Brave Browser ($CHANNEL)" 
-    
+    echo "Installing Brave Browser ($CHANNEL)"
+
     if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
         if ! available curl && ! available wget; then
@@ -55,7 +55,7 @@ main() {
         fi
         show $curl "https://brave-browser-apt-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin "/usr/share/keyrings/brave-browser$dashCHANNEL-archive-keyring.gpg"
-        show $curl "https://brave-browser-apt-${CHANNEL}.s3.brave.com/brave-browser.sources"|\
+        show $curl "https://brave-browser-apt-$CHANNEL.s3.brave.com/brave-browser.sources"|\
             show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-$CHANNEL.sources"
         show $sudo rm -f /etc/apt/sources.list.d/brave-browser-*.list
         show $sudo apt-get update || apt_error
