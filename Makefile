@@ -1,6 +1,7 @@
 # Select the Browser channel
 
 CHANNEL ?= release
+$(if $(filter $(CHANNEL),release beta nightly),,$(error Unknown browser channel `$(CHANNEL)'))
 
 # Distros to test install.sh on
 
