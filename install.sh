@@ -9,7 +9,9 @@
 
 GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
+
 CHANNEL="${CHANNEL:-release}"
+
 set -eu
 
 main() {
