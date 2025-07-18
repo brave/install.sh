@@ -39,7 +39,7 @@ manjarolinux/base: setup = mv /etc/pacman.conf{.pacnew,} || true
 
 $(supported):
 	printf "Testing $(CHANNEL) on supported distribution $(distro)... "
-	dashCHANNEL="$$([[ "$(CHANNEL)" == release ]] && echo "$(CHANNEL)" || echo "-$(CHANNEL)")"
+	dashCHANNEL="$$([[ "$(CHANNEL)" == release ]] && echo || echo "-$(CHANNEL)")"
 	if docker run --rm -e CHANNEL="$(CHANNEL)" -v "$$PWD/install.sh:/install.sh" "$(distro)" \
 	   sh -c '$(or $(setup),true) && /install.sh && "brave-browser$$dashCHANNEL" --version || "brave$$dashCHANNEL" --version' >"$(log)" 2>&1; then
 	    echo OK
