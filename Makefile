@@ -1,7 +1,12 @@
+# Select the Browser channel
+
+CHANNEL ?= release
+$(if $(filter $(CHANNEL),release beta nightly),,$(error Unknown browser channel `$(CHANNEL)'))
+
 # Distros to test install.sh on
 
 unsupported := alpine voidlinux/voidlinux-musl ubuntu_16.04 debian_9 linuxmintd/mint18-amd64 fedora_26 opensuse/leap_42.3
-supported := ubuntu_18.04 ubuntu_25.04 debian_10 linuxmintd/mint19-amd64 fedora_27 fedora_41 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 manjarolinux/base
+supported := ubuntu_18.04 ubuntu_25.04 debian_11 linuxmintd/mint19-amd64 fedora_27 fedora_41 opensuse/leap_15 opensuse/tumbleweed rockylinux_9 $(if $(CHANNEL:release=),,manjarolinux/base)
 distros := $(unsupported) $(supported)
 
 test: shellcheck ut $(distros)
@@ -21,8 +26,8 @@ $(distros): distro = $(subst _,:,$@)
 $(distros) $(distros:%=%_clean): log = $(subst /,_,$(subst _,:,$(@:%_clean=%))).log
 
 $(unsupported):
-	printf "Testing unsupported distribution $(distro)... "
-	if ! docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
+	printf "Testing $(CHANNEL) on unsupported distribution $(distro)... "
+	if ! docker run --rm -e CHANNEL="$(CHANNEL)" -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
 	   grep -q "Unsupported glibc version" "$(log)"; then
 	    echo OK
 	else
@@ -33,9 +38,10 @@ opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 manjarolinux/base: setup = mv /etc/pacman.conf{.pacnew,} || true
 
 $(supported):
-	printf "Testing supported distribution $(distro)... "
-	if docker run --rm -v "$$PWD/install.sh:/install.sh" "$(distro)" \
-	   sh -c '$(or $(setup),true) && /install.sh && brave-browser --version || brave --version' >"$(log)" 2>&1; then
+	printf "Testing $(CHANNEL) on supported distribution $(distro)... "
+	dashCHANNEL="$$([[ "$(CHANNEL)" == release ]] && echo || echo "-$(CHANNEL)")"
+	if docker run --rm -e CHANNEL="$(CHANNEL)" -v "$$PWD/install.sh:/install.sh" "$(distro)" \
+	   sh -c '$(or $(setup),true) && /install.sh && "brave-browser$$dashCHANNEL" --version || "brave$$dashCHANNEL" --version' >"$(log)" 2>&1; then
 	    echo OK
 	else
 	    printf "Failed\n\n" && tail -v "$(log)" && false
