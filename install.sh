@@ -17,8 +17,8 @@ main() {
     ## Check if the browser can run on this system
 
     case "$PRODUCT" in
-        browser) PRODUCT_NAME="Brave"; PRODUCT_FULL_NAME="Brave Browser";;
-        origin) PRODUCT_NAME="Brave Origin"; PRODUCT_FULL_NAME="Brave Origin";;
+        browser) PRODUCT_LABEL="Brave Browser";;
+        origin) PRODUCT_LABEL="Brave Origin";;
         *) error "Invalid product $PRODUCT. Only browser and origin are supported.";;
     esac
 
@@ -54,7 +54,7 @@ main() {
 
     ## Install the browser
 
-    echo "Installing $PRODUCT_FULL_NAME ($CHANNEL)"
+    echo "Installing $PRODUCT_LABEL ($CHANNEL)"
 
     if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
@@ -81,16 +81,12 @@ main() {
         show $sudo dnf install -y "brave-$PRODUCT$dashCHANNEL"
 
     elif available eopkg; then
-        if [ "$PRODUCT" != "browser" ]; then
-            error "eopkg is only supported for brave-browser."
-        fi
+        [ "$PRODUCT" = "browser" ] || error "eopkg is only supported for brave-browser."
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        if [ "$PRODUCT" != "browser" ]; then
-            error "pacman is only supported for brave-browser."
-        fi
+        [ "$PRODUCT" = "browser" ] || error "pacman is only supported for brave-browser."
         if pacman -Ss "brave-browser$dashCHANNEL" >/dev/null 2>&1; then
             show $sudo pacman -Sy --needed --noconfirm "brave-browser$dashCHANNEL"
         else
@@ -124,9 +120,9 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if available "brave-${PRODUCT}$dashCHANNEL" || available "brave$dashCHANNEL"; then
-        printf "Installation complete! Start $PRODUCT_NAME by typing: "
-        basename "$(command -v "brave-${PRODUCT}$dashCHANNEL" || command -v "brave$dashCHANNEL")"
+    if available "brave-${PRODUCT}$dashCHANNEL" || available "${PRODUCT}$dashCHANNEL" || available "brave$dashCHANNEL"; then
+        printf "Installation complete! Start $PRODUCT_LABEL by typing: "
+        basename "$(command -v "brave-${PRODUCT}$dashCHANNEL" || command -v "${PRODUCT}$dashCHANNEL" || command -v "brave$dashCHANNEL")"
     else
         echo "Installation complete!"
     fi
