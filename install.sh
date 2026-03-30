@@ -11,9 +11,16 @@ GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
 
 CHANNEL="${CHANNEL:-release}"
+PRODUCT="${PRODUCT:-brave-browser}"
 
 main() {
     ## Check if the browser can run on this system
+
+    case "$PRODUCT" in
+        brave-browser) PRODUCT_NAME="Brave"; PRODUCT_FULL_NAME="Brave Browser";;
+        brave-origin) PRODUCT_NAME="Brave Origin"; PRODUCT_FULL_NAME="Brave Origin";;
+        *) error "Invalid product $PRODUCT. Only brave-browser and brave-origin are supported.";;
+    esac
 
     case "$(uname)" in
         Darwin) error "Please go to https://brave.com/download/ to download the Mac app";;
@@ -47,7 +54,7 @@ main() {
 
     ## Install the browser
 
-    echo "Installing Brave Browser ($CHANNEL)"
+    echo "Installing $PRODUCT_FULL_NAME ($CHANNEL)"
 
     if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
@@ -55,13 +62,14 @@ main() {
             show $sudo apt-get update || apt_error
             show $sudo apt-get install -y curl
         fi
+        # All products share the brave-browser signing key.
         show $curl "https://brave-browser-apt-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL-archive-keyring.gpg"|\
             show $sudo install -DTm644 /dev/stdin "/usr/share/keyrings/brave-browser$dashCHANNEL-archive-keyring.gpg"
         show $curl "https://brave-browser-apt-$CHANNEL.s3.brave.com/brave-browser.sources"|\
             show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-$CHANNEL.sources"
         show $sudo rm -f /etc/apt/sources.list.d/brave-browser-*.list
         show $sudo apt-get update || apt_error
-        show $sudo apt-get install -y "brave-browser$dashCHANNEL"
+        show $sudo apt-get install -y "$PRODUCT$dashCHANNEL"
 
     elif available dnf; then
         if dnf --version|grep -q dnf5; then
@@ -70,13 +78,19 @@ main() {
             show $sudo dnf install -y 'dnf-command(config-manager)'
             show $sudo dnf config-manager --add-repo "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"
         fi
-        show $sudo dnf install -y "brave-browser$dashCHANNEL"
+        show $sudo dnf install -y "$PRODUCT$dashCHANNEL"
 
     elif available eopkg; then
+        if [ "$PRODUCT" != "brave-browser" ]; then
+            error "eopkg is only supported for brave-browser."
+        fi
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
     elif available pacman; then
+        if [ "$PRODUCT" != "brave-browser" ]; then
+            error "pacman is only supported for brave-browser."
+        fi
         if pacman -Ss "brave-browser$dashCHANNEL" >/dev/null 2>&1; then
             show $sudo pacman -Sy --needed --noconfirm "brave-browser$dashCHANNEL"
         else
@@ -89,18 +103,18 @@ main() {
     elif available zypper; then
         show $sudo zypper --non-interactive addrepo --gpgcheck --repo "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
-        show $sudo zypper --non-interactive install "brave-browser$dashCHANNEL"
+        show $sudo zypper --non-interactive install "$PRODUCT$dashCHANNEL"
 
     elif available yum; then
         available yum-config-manager || show $sudo yum install yum-utils -y
         show $sudo yum-config-manager -y --add-repo "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"
-        show $sudo yum install "brave-browser$dashCHANNEL" -y
+        show $sudo yum install "$PRODUCT$dashCHANNEL" -y
 
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
         show $curl "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"|\
             show $sudo install -DTm644 /dev/stdin "/etc/yum.repos.d/brave-browser$dashCHANNEL.repo"
-        show $sudo rpm-ostree install -y --idempotent "brave-browser$dashCHANNEL"
+        show $sudo rpm-ostree install -y --idempotent "$PRODUCT$dashCHANNEL"
 
     else
         error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
@@ -110,9 +124,9 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if available "brave$dashCHANNEL" || available "brave-browser$dashCHANNEL"; then
-        printf "Installation complete! Start Brave by typing: "
-        basename "$(command -v "brave-browser$dashCHANNEL" || command -v "brave$dashCHANNEL")"
+    if available "${PRODUCT}$dashCHANNEL" || available "brave$dashCHANNEL"; then
+        printf "Installation complete! Start $PRODUCT_NAME by typing: "
+        basename "$(command -v "${PRODUCT}$dashCHANNEL" || command -v "brave$dashCHANNEL")"
     else
         echo "Installation complete!"
     fi
