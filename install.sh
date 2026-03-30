@@ -81,12 +81,12 @@ main() {
         show $sudo dnf install -y "brave-$PRODUCT$dashCHANNEL"
 
     elif available eopkg; then
-        [ "$PRODUCT" = "browser" ] || error "eopkg is only supported for brave-browser."
+        [ "$PRODUCT" = browser ] || error "eopkg is only supported for brave-browser."
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        [ "$PRODUCT" = "browser" ] || error "pacman is only supported for brave-browser."
+        [ "$PRODUCT" = browser ] || error "pacman is only supported for brave-browser."
         if pacman -Ss "brave-browser$dashCHANNEL" >/dev/null 2>&1; then
             show $sudo pacman -Sy --needed --noconfirm "brave-browser$dashCHANNEL"
         else
