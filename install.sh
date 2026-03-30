@@ -86,14 +86,17 @@ main() {
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        [ "$PRODUCT" = browser ] || error "pacman is only supported for brave-browser."
-        if pacman -Ss "brave-browser$dashCHANNEL" >/dev/null 2>&1; then
-            show $sudo pacman -Sy --needed --noconfirm "brave-browser$dashCHANNEL"
+        if pacman -Ss "brave-$PRODUCT$dashCHANNEL" >/dev/null 2>&1; then
+            show $sudo pacman -Sy --needed --noconfirm "brave-$PRODUCT$dashCHANNEL"
         else
             aur_helper="$(first_of paru pikaur yay)" ||
                 error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
                       "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
-            show "$aur_helper" -Sy --needed --noconfirm "brave$dashCHANNEL-bin"
+            case "$PRODUCT" in
+                browser) aur_pkg="brave$dashCHANNEL-bin";;
+                *) aur_pkg="$PRODUCT$dashCHANNEL-bin";;
+            esac
+            show "$aur_helper" -Sy --needed --noconfirm "$aur_pkg"
         fi
 
     elif available zypper; then
