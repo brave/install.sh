@@ -124,7 +124,7 @@ main() {
     fi
 
     if available "brave-${PRODUCT}$dashCHANNEL" || available "${PRODUCT}$dashCHANNEL" || available "brave$dashCHANNEL"; then
-        printf "Installation complete! Start $PRODUCT_LABEL by typing: "
+        printf "Installation complete! Start %s by typing: " "$PRODUCT_LABEL"
         basename "$(command -v "brave-${PRODUCT}$dashCHANNEL" || command -v "${PRODUCT}$dashCHANNEL" || command -v "brave$dashCHANNEL")"
     else
         echo "Installation complete!"
