@@ -11,6 +11,7 @@ GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
 
 CHANNEL="${CHANNEL:-release}"
+FLAVOR="${FLAVOR:-browser}"
 
 main() {
     ## Check if the browser can run on this system
@@ -37,17 +38,23 @@ main() {
         *) curl="curl -fsS";;
     esac
 
-    ## Validate the browser channel
+    ## Validate the flavor and channel
+
+    case "$FLAVOR" in
+        browser) FLAVOR_LABEL="Brave Browser";;
+        origin) FLAVOR_LABEL="Brave Origin";;
+        *) error "Invalid flavor $FLAVOR. Only browser and origin are supported.";;
+    esac
 
     case "$CHANNEL" in
-        release|stable) dashCHANNEL="";;
+        release) dashCHANNEL="";;
         beta|nightly) dashCHANNEL="-$CHANNEL";;
         *) error "Invalid channel $CHANNEL. Only release, beta and nightly are supported.";;
     esac
 
     ## Install the browser
 
-    echo "Installing Brave Browser ($CHANNEL)"
+    echo "Installing $FLAVOR_LABEL ($CHANNEL)"
 
     if available apt-get && apt_supported; then
         export DEBIAN_FRONTEND=noninteractive
@@ -61,7 +68,7 @@ main() {
             show $sudo install -DTm644 /dev/stdin "/etc/apt/sources.list.d/brave-browser-$CHANNEL.sources"
         show $sudo rm -f /etc/apt/sources.list.d/brave-browser-*.list
         show $sudo apt-get update || apt_error
-        show $sudo apt-get install -y "brave-browser$dashCHANNEL"
+        show $sudo apt-get install -y "brave-$FLAVOR$dashCHANNEL"
 
     elif available dnf; then
         if dnf --version|grep -q dnf5; then
@@ -70,37 +77,42 @@ main() {
             show $sudo dnf install -y 'dnf-command(config-manager)'
             show $sudo dnf config-manager --add-repo "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"
         fi
-        show $sudo dnf install -y "brave-browser$dashCHANNEL"
+        show $sudo dnf install -y "brave-$FLAVOR$dashCHANNEL"
 
     elif available eopkg; then
+        [ "$FLAVOR" = browser ] || error "$FLAVOR_LABEL is not available for eopkg."
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
     elif available pacman; then
-        if pacman -Ss "brave-browser$dashCHANNEL" >/dev/null 2>&1; then
-            show $sudo pacman -Sy --needed --noconfirm "brave-browser$dashCHANNEL"
+        if pacman -Ss "brave-$FLAVOR$dashCHANNEL" >/dev/null 2>&1; then
+            show $sudo pacman -Sy --needed --noconfirm "brave-$FLAVOR$dashCHANNEL"
         else
             aur_helper="$(first_of paru pikaur yay)" ||
                 error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
                       "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
-            show "$aur_helper" -Sy --needed --noconfirm "brave$dashCHANNEL-bin"
+            case $FLAVOR in
+                browser) aur_pkg="brave$dashCHANNEL-bin";;
+                *) aur_pkg="$FLAVOR$dashCHANNEL-bin";;
+            esac
+            show "$aur_helper" -Sy --needed --noconfirm "$aur_pkg"
         fi
 
     elif available zypper; then
         show $sudo zypper --non-interactive addrepo --gpgcheck --repo "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"
         show $sudo zypper --non-interactive --gpg-auto-import-keys refresh
-        show $sudo zypper --non-interactive install "brave-browser$dashCHANNEL"
+        show $sudo zypper --non-interactive install "brave-$FLAVOR$dashCHANNEL"
 
     elif available yum; then
         available yum-config-manager || show $sudo yum install yum-utils -y
         show $sudo yum-config-manager -y --add-repo "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"
-        show $sudo yum install "brave-browser$dashCHANNEL" -y
+        show $sudo yum install "brave-$FLAVOR$dashCHANNEL" -y
 
     elif available rpm-ostree; then
         available curl || available wget || error "Please install curl/wget to proceed."
         show $curl "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"|\
             show $sudo install -DTm644 /dev/stdin "/etc/yum.repos.d/brave-browser$dashCHANNEL.repo"
-        show $sudo rpm-ostree install -y --idempotent "brave-browser$dashCHANNEL"
+        show $sudo rpm-ostree install -y --idempotent "brave-$FLAVOR$dashCHANNEL"
 
     else
         error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
@@ -110,9 +122,15 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if available "brave$dashCHANNEL" || available "brave-browser$dashCHANNEL"; then
-        printf "Installation complete! Start Brave by typing: "
-        basename "$(command -v "brave-browser$dashCHANNEL" || command -v "brave$dashCHANNEL")"
+    if [ "$FLAVOR" = browser ]; then
+        binary="$(command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)"
+    else
+        binary="$(command -v "$FLAVOR$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)"
+    fi
+
+    if [ -n "$binary" ]; then
+        printf "Installation complete! Start %s by typing: " "$FLAVOR_LABEL"
+        basename "$binary"
     else
         echo "Installation complete!"
     fi
