@@ -38,7 +38,7 @@ main() {
         *) curl="curl -fsS";;
     esac
 
-    ## Validate the product and channel
+    ## Validate the flavor and channel
 
     case "$FLAVOR" in
         browser) FLAVOR_LABEL="Brave Browser";;
@@ -80,7 +80,7 @@ main() {
         show $sudo dnf install -y "brave-$FLAVOR$dashCHANNEL"
 
     elif available eopkg; then
-        [ "$FLAVOR" = browser ] || error "eopkg is only supported for brave-browser."
+        [ "$FLAVOR" = browser ] || error "$FLAVOR_LABEL is not available for eopkg."
         show $sudo eopkg update-repo -y
         show $sudo eopkg install -y brave
 
