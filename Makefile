@@ -8,7 +8,7 @@ MAYBE_SUDO := $(shell id -nG|grep -qw 'docker\|root' && echo || echo sudo)
 .SHELLFLAGS := -eEo pipefail -c
 .ONESHELL:
 $(V).SILENT:
-.PHONY: clean shellcheck test ut $(distros) $(distros:%=%_clean)
+.PHONY: shellcheck test ut
 
 # Test helper functions from install.sh in an alpine container
 
