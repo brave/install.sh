@@ -1,4 +1,4 @@
-test: shellcheck ut $(distros)
+test: shellcheck ut
 
 # Output per target, use bash in recipes, fail on errors, be quiet by default
 
