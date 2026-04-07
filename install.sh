@@ -122,11 +122,10 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    if [ "$FLAVOR" = browser ]; then
-        binary="$(command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)"
-    else
-        binary="$(command -v "$FLAVOR$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)"
-    fi
+    case "$FLAVOR" in
+        browser) binary="$(command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
+        *) binary="$(command -v "$FLAVOR$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
+    esac
 
     if [ -n "$binary" ]; then
         printf "Installation complete! Start %s by typing: " "$FLAVOR_LABEL"
