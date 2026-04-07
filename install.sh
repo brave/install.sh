@@ -3,15 +3,15 @@
 # Copyright (c) 2024 The Brave Authors
 # SPDX-License-Identifier: BSD-3-Clause
 #
-# This script installs the Brave browser using the OS's package manager
+# This script installs Brave Browser, or Brave Origin using the OS's package manager
 # Requires: coreutils, grep, sh and one of sudo/doas/run0/pkexec/sudo-rs
 # Source: https://github.com/brave/install.sh
 
 GLIBC_VER_MIN="2.26"
 APT_VER_MIN="1.1"
 
-CHANNEL="${CHANNEL:-release}"
 FLAVOR="${FLAVOR:-browser}"
+CHANNEL="${CHANNEL:-release}"
 
 main() {
     ## Check if the browser can run on this system
@@ -26,18 +26,6 @@ main() {
         *) error "Unsupported architecture $(uname -m). Only 64-bit x86 or ARM machines are supported.";;
     esac
 
-    ## Locate the necessary tools
-
-    case "$(whoami)" in
-        root) sudo="";;
-        *) sudo="$(first_of sudo doas run0 pkexec sudo-rs)" || error "Please install sudo/doas/run0/pkexec/sudo-rs to proceed.";;
-    esac
-
-    case "$(first_of curl wget)" in
-        wget) curl="wget -qO-";;
-        *) curl="curl -fsS";;
-    esac
-
     ## Validate the flavor and channel
 
     case "$FLAVOR" in
@@ -50,6 +38,18 @@ main() {
         release) dashCHANNEL="";;
         beta|nightly) dashCHANNEL="-$CHANNEL";;
         *) error "Invalid channel $CHANNEL. Only release, beta and nightly are supported.";;
+    esac
+
+    ## Locate the necessary tools
+
+    case "$(whoami)" in
+        root) sudo="";;
+        *) sudo="$(first_of sudo doas run0 pkexec sudo-rs)" || error "Please install sudo/doas/run0/pkexec/sudo-rs to proceed.";;
+    esac
+
+    case "$(first_of curl wget)" in
+        wget) curl="wget -qO-";;
+        *) curl="curl -fsS";;
     esac
 
     ## Install the browser

@@ -2,6 +2,8 @@
 
 CHANNEL ?= release
 $(if $(filter $(CHANNEL),release beta nightly),,$(error Unknown browser channel `$(CHANNEL)'))
+FLAVOR ?= browser
+$(if $(filter $(FLAVOR),browser origin),,$(error Unknown flavor `$(FLAVOR)'))
 
 # Distros to test install.sh on
 
@@ -15,6 +17,7 @@ test: shellcheck ut $(distros)
 
 MAKEFLAGS := -rRO
 SHELL := $(shell command -v bash)
+MAYBE_SUDO := $(shell id -nG|grep -qw 'docker\|root' && echo || echo sudo)
 .SHELLFLAGS := -eEo pipefail -c
 .ONESHELL:
 $(V).SILENT:
@@ -26,9 +29,9 @@ $(distros): distro = $(subst _,:,$@)
 $(distros) $(distros:%=%_clean): log = $(subst /,_,$(subst _,:,$(@:%_clean=%))).log
 
 $(unsupported):
-	printf "Testing $(CHANNEL) on unsupported distribution $(distro)... "
-	if ! docker run --rm -e CHANNEL="$(CHANNEL)" -v "$$PWD/install.sh:/install.sh" "$(distro)" /install.sh >"$(log)" 2>&1 &&\
-	   grep -q "Unsupported glibc version" "$(log)"; then
+	printf "Testing $(CHANNEL) $(FLAVOR) on unsupported distribution $(distro)... "
+	if ! $(MAYBE_SUDO) docker run --rm -e CHANNEL="$(CHANNEL)" -e FLAVOR="$(FLAVOR)" -v "$$PWD/install.sh:/install.sh" \
+	    "$(distro)" /install.sh >"$(log)" 2>&1 && grep -q "Unsupported glibc version" "$(log)"; then
 	    echo OK
 	else
 	    printf "Failed\n\n" && tail -v "$(log)" && false
@@ -38,9 +41,9 @@ opensuse/tumbleweed: setup = zypper --non-interactive install libglib-2_0-0
 manjarolinux/base: setup = mv /etc/pacman.conf{.pacnew,} || true
 
 $(supported):
-	printf "Testing $(CHANNEL) on supported distribution $(distro)... "
+	printf "Testing $(CHANNEL) $(FLAVOR) on supported distribution $(distro)... "
 	dashCHANNEL="$$([[ "$(CHANNEL)" == release ]] && echo || echo "-$(CHANNEL)")"
-	if docker run --rm -e CHANNEL="$(CHANNEL)" -v "$$PWD/install.sh:/install.sh" "$(distro)" \
+	if $(MAYBE_SUDO) docker run --rm -e CHANNEL="$(CHANNEL)" -e FLAVOR="$(FLAVOR)" -v "$$PWD/install.sh:/install.sh" "$(distro)" \
 	   sh -c '$(or $(setup),true) && /install.sh && "brave-browser$$dashCHANNEL" --version || "brave$$dashCHANNEL" --version' >"$(log)" 2>&1; then
 	    echo OK
 	else
@@ -66,7 +69,7 @@ ut_supported: test = supported foo 1.12 1.9
 
 $(uts): ut_%:
 	printf "Testing function $*()... "
-	docker run --rm -v "$$PWD/install.sh:/install.sh" alpine \
+	$(MAYBE_SUDO) docker run --rm -v "$$PWD/install.sh:/install.sh" alpine \
 	    sh -$(if $(V),x,)ec 'source <(grep -x "\w\w*() {.*}" /install.sh) && $(test)'
 	echo OK
 
