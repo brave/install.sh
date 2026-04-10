@@ -91,9 +91,9 @@ main() {
             aur_helper="$(first_of paru pikaur yay)" ||
                 error "Could not find an AUR helper. Please install paru/pikaur/yay to proceed." "" \
                       "You can find more information about AUR helpers at https://wiki.archlinux.org/title/AUR_helpers"
-            case $FLAVOR in
+            case "$FLAVOR" in
                 browser) aur_pkg="brave$dashCHANNEL-bin";;
-                *) aur_pkg="$FLAVOR$dashCHANNEL-bin";;
+                *) aur_pkg="brave-$FLAVOR$dashCHANNEL-bin";;
             esac
             show "$aur_helper" -Sy --needed --noconfirm "$aur_pkg"
         fi
@@ -127,12 +127,10 @@ main() {
         *) binary="$(command -v "$FLAVOR$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
     esac
 
-    if [ -n "$binary" ]; then
-        printf "Installation complete! Start %s by typing: " "$FLAVOR_LABEL"
-        basename "$binary"
-    else
-        echo "Installation complete!"
-    fi
+    case "$binary" in
+        "") echo "Installation complete!";;
+        *) printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")";;
+    esac
 }
 
 # Helpers
