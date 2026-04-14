@@ -124,7 +124,7 @@ main() {
 
     case "$FLAVOR" in
         browser) binary="$(command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
-        *) binary="$(command -v "$FLAVOR$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
+        *) binary="$(command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
     esac
 
     case "$binary" in
