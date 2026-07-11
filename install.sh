@@ -114,8 +114,91 @@ main() {
             show $sudo install -DTm644 /dev/stdin "/etc/yum.repos.d/brave-browser$dashCHANNEL.repo"
         show $sudo rpm-ostree install -y --idempotent "brave-$FLAVOR$dashCHANNEL"
 
+    elif available xbps-install; then
+        if ! available unzip; then
+            show $sudo xbps-install -Sy unzip
+        fi
+
+        case "$CHANNEL" in
+            release) CHAN="" ;;
+            beta|nightly) CHAN="-$CHANNEL" ;;
+        esac
+
+        case "$FLAVOR" in
+            browser) BASE="brave-browser$CHAN" ;;
+            origin) BASE="brave-origin$CHAN" ;;
+        esac
+
+        INSTALL_DIR="/opt/$BASE"
+
+        if [ "$CHANNEL" = "release" ]; then
+            LATEST_TAG=$(show $curl "https://api.github.com/repos/brave/brave-browser/releases/latest" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+        else
+            LATEST_TAG=$(show $curl "https://api.github.com/repos/brave/brave-browser/releases?per_page=10" 2>/dev/null | grep '"tag_name"' | head -1 | cut -d'"' -f4)
+        fi
+
+        [ -n "$LATEST_TAG" ] || error "Could not determine the latest Brave release from GitHub."
+        VERSION="${LATEST_TAG#v}"
+
+        echo "Downloading $BASE-$VERSION-linux-amd64.zip from GitHub release $LATEST_TAG ..."
+
+        TMPDIR="$(mktemp -d)"
+        EXTRACT_DIR="$TMPDIR/extract"
+        ZIP_URL="https://github.com/brave/brave-browser/releases/download/$LATEST_TAG/$BASE-$VERSION-linux-amd64.zip"
+
+        show $curl -L "$ZIP_URL" -o "$TMPDIR/brave.zip" || error "Failed to download Brave from $ZIP_URL"
+
+        if [ -d "$INSTALL_DIR" ]; then
+            show $sudo rm -rf "$INSTALL_DIR"
+        fi
+
+        mkdir -p "$EXTRACT_DIR"
+        show unzip -q "$TMPDIR/brave.zip" -d "$EXTRACT_DIR"
+
+        show $sudo mkdir -p "$INSTALL_DIR"
+        show $sudo cp -a "$EXTRACT_DIR"/. "$INSTALL_DIR/"
+        show $sudo chown -R root:root "$INSTALL_DIR"
+
+        case "$FLAVOR" in
+            browser) LAUNCHER="brave" ;;
+            origin) LAUNCHER="brave-origin" ;;
+        esac
+        [ -f "$INSTALL_DIR/$LAUNCHER" ] || LAUNCHER="brave"
+
+        show $sudo ln -sf "$INSTALL_DIR/$LAUNCHER" "/usr/local/bin/brave"
+
+        show $sudo mkdir -p /usr/share/applications
+        show $sudo tee /usr/share/applications/brave-browser.desktop >/dev/null <<DESKTOP_EOF
+[Desktop Entry]
+Version=1.0
+Name=$FLAVOR_LABEL
+GenericName=Web Browser
+Comment=$FLAVOR_LABEL Web Browser
+Exec=/usr/local/bin/brave %U
+Terminal=false
+Type=Application
+Icon=brave-browser
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
+DESKTOP_EOF
+
+        if [ -f "$INSTALL_DIR/product_logo_128.png" ]; then
+            show $sudo mkdir -p /usr/share/pixmaps
+            show $sudo cp "$INSTALL_DIR/product_logo_128.png" /usr/share/pixmaps/brave-browser.png
+            for _size in 16 24 32 48 64 128 256; do
+                if [ -f "$INSTALL_DIR/product_logo_${_size}.png" ]; then
+                    show $sudo mkdir -p "/usr/share/icons/hicolor/${_size}x${_size}/apps"
+                    show $sudo cp "$INSTALL_DIR/product_logo_${_size}.png" "/usr/share/icons/hicolor/${_size}x${_size}/apps/brave-browser.png"
+                fi
+            done
+        fi
+
+        show $sudo ln -sf "$INSTALL_DIR/$LAUNCHER" "/usr/local/bin/brave-$FLAVOR$dashCHANNEL"
+
+        rm -rf "$TMPDIR"
+
     else
-        error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
+        error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper/xbps are supported." "" \
             "If you'd like us to support your system better, please file an issue at" \
             "https://github.com/brave/install.sh/labels/new-distro and include the following information:" "" \
             "$(uname -srvmo || true)" "" \
