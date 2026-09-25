@@ -13,6 +13,9 @@ APT_VER_MIN="1.1"
 FLAVOR="${FLAVOR:-browser}"
 CHANNEL="${CHANNEL:-release}"
 
+# Shebang flags are ignored when the script is invoked as `sh install.sh`
+set -eu
+
 main() {
     ## Check if the browser can run on this system
 
@@ -122,21 +125,17 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    case "$FLAVOR" in
-        browser) binary="$(command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
-        *) binary="$(command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
-    esac
-
-    case "$binary" in
-        "") echo "Installation complete!";;
-        *) printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")";;
-    esac
+    # Packages ship a channel-suffixed binary and register brave-$FLAVOR via update-alternatives.
+    # Arch AUR packages use brave / brave-beta.
+    binary="$(command -v "brave-$FLAVOR" || command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)"
+    [ -s "$binary" ] || error "Installation failed: $FLAVOR_LABEL was not found on PATH."
+    printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")"
 }
 
 # Helpers
 available() { command -v "${1:?}" >/dev/null; }
 first_of() { for c in "${@:?}"; do if available "$c"; then echo "$c"; return 0; fi; done; return 1; }
-show() { (set -x; "${@:?}"); }
+show() { (set -ex; "${@:?}"); }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
