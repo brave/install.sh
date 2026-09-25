@@ -13,6 +13,9 @@ APT_VER_MIN="1.1"
 FLAVOR="${FLAVOR:-browser}"
 CHANNEL="${CHANNEL:-release}"
 
+# Shebang flags are ignored when the script is invoked as `sh install.sh`
+set -eu
+
 main() {
     ## Check if the browser can run on this system
 
@@ -113,6 +116,15 @@ main() {
         show $curl "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"|\
             show $sudo install -DTm644 /dev/stdin "/etc/yum.repos.d/brave-browser$dashCHANNEL.repo"
         show $sudo rpm-ostree install -y --idempotent "brave-$FLAVOR$dashCHANNEL"
+        # A staged deployment is not on PATH until reboot, but --idempotent also succeeds
+        # without staging anything when the package is in the running deployment already.
+        binary="$(brave_binary)"
+        if [ -s "$binary" ]; then
+            printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")"
+        else
+            printf "Installation staged. Reboot to start %s.\n" "$FLAVOR_LABEL"
+        fi
+        return
 
     else
         error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
@@ -122,21 +134,24 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    case "$FLAVOR" in
-        browser) binary="$(command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
-        *) binary="$(command -v "brave-$FLAVOR$dashCHANNEL" || true)";;
-    esac
-
-    case "$binary" in
-        "") echo "Installation complete!";;
-        *) printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")";;
-    esac
+    binary="$(brave_binary)"
+    [ -s "$binary" ] || error "Installation failed: $FLAVOR_LABEL was not found on PATH."
+    printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")"
 }
 
 # Helpers
+# Resolve only channel-specific names. Checking unsuffixed brave-$FLAVOR first can
+# pick a different channel already registered via update-alternatives.
+# Arch AUR packages use brave / brave-beta.
+brave_binary() {
+    case "$FLAVOR" in
+        browser) command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true;;
+        *) command -v "brave-$FLAVOR$dashCHANNEL" || true;;
+    esac
+}
 available() { command -v "${1:?}" >/dev/null; }
 first_of() { for c in "${@:?}"; do if available "$c"; then echo "$c"; return 0; fi; done; return 1; }
-show() { (set -x; "${@:?}"); }
+show() { (set -ex; "${@:?}"); }
 error() { exec >&2; printf "Error: "; printf "%s\n" "${@:?}"; exit 1; }
 newer() { [ "$(printf "%s\n%s" "$1" "$2"|sort -V|head -n1)" = "${2:?}" ]; }
 supported() { newer "$2" "${3:?}" || error "Unsupported ${1:?} version ${2:-<empty>}. Only $1 versions >=$3 are supported."; }
