@@ -116,6 +116,15 @@ main() {
         show $curl "https://brave-browser-rpm-$CHANNEL.s3.brave.com/brave-browser$dashCHANNEL.repo"|\
             show $sudo install -DTm644 /dev/stdin "/etc/yum.repos.d/brave-browser$dashCHANNEL.repo"
         show $sudo rpm-ostree install -y --idempotent "brave-$FLAVOR$dashCHANNEL"
+        # A staged deployment is not on PATH until reboot, but --idempotent also succeeds
+        # without staging anything when the package is in the running deployment already.
+        binary="$(brave_binary)"
+        if [ -s "$binary" ]; then
+            printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")"
+        else
+            printf "Installation staged. Reboot to start %s.\n" "$FLAVOR_LABEL"
+        fi
+        return
 
     else
         error "Could not find a supported package manager. Only apt/dnf/eopkg/pacman(+paru/pikaur/yay)/rpm-ostree/yum/zypper are supported." "" \
@@ -125,14 +134,21 @@ main() {
             "$(cat /etc/os-release || true)"
     fi
 
-    # Packages ship a channel-suffixed binary and register brave-$FLAVOR via update-alternatives.
-    # Arch AUR packages use brave / brave-beta.
-    binary="$(command -v "brave-$FLAVOR" || command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true)"
+    binary="$(brave_binary)"
     [ -s "$binary" ] || error "Installation failed: $FLAVOR_LABEL was not found on PATH."
     printf "Installation complete! Start %s by typing: %s\n" "$FLAVOR_LABEL" "$(basename "$binary")"
 }
 
 # Helpers
+# Resolve only channel-specific names. Checking unsuffixed brave-$FLAVOR first can
+# pick a different channel already registered via update-alternatives.
+# Arch AUR packages use brave / brave-beta.
+brave_binary() {
+    case "$FLAVOR" in
+        browser) command -v "brave$dashCHANNEL" || command -v "brave-$FLAVOR$dashCHANNEL" || true;;
+        *) command -v "brave-$FLAVOR$dashCHANNEL" || true;;
+    esac
+}
 available() { command -v "${1:?}" >/dev/null; }
 first_of() { for c in "${@:?}"; do if available "$c"; then echo "$c"; return 0; fi; done; return 1; }
 show() { (set -ex; "${@:?}"); }
